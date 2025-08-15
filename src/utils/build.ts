@@ -20,9 +20,9 @@ function getItemEmoji(item: T.Item | string): string {
 function getOpPrettyName(op: T.Operator, { rarity = true, emoji = true, name = true } = {}): string {
     let string = '';
     if (rarity)
-        string += `${gameConsts.rarity[op.data.rarity] + 1}★ `
+        string += `${gameConsts.rarity[op.data.rarity] + 1}★ `;
     if (emoji)
-        string += `<:${op.id}:${globalEmojis[op.id].id}> `
+        string += globalEmojis[op.id] ? `<:${op.id}:${globalEmojis[op.id].id}> ` : '';
     if (name)
         string += op.data.name;
     return string;
