@@ -20,9 +20,9 @@ function getItemEmoji(item: T.Item | string): string {
 function getOpPrettyName(op: T.Operator, { rarity = true, emoji = true, name = true } = {}): string {
     let string = '';
     if (rarity)
-        string += `${gameConsts.rarity[op.data.rarity] + 1}★ `
+        string += `${gameConsts.rarity[op.data.rarity] + 1}★ `;
     if (emoji)
-        string += `<:${op.id}:${globalEmojis[op.id].id}> `
+        string += globalEmojis[op.id] ? `<:${op.id}:${globalEmojis[op.id].id}> ` : '';
     if (name)
         string += op.data.name;
     return string;
@@ -215,7 +215,7 @@ export async function buildCCSelectMessage(season: string): Promise<Djs.BaseMess
         .setPlaceholder('Select a stage!');
     const componentRow = new Djs.ActionRowBuilder<Djs.StringSelectMenuBuilder>().addComponents(ccSelector);
 
-    const names: string = gameConsts.ccSeasons[season];
+    const names: string[] = gameConsts.ccSeasons[season];
     for (const name of names) {
         ccSelector.addOptions(new Djs.StringSelectMenuOptionBuilder()
             .setLabel(name)
@@ -231,7 +231,7 @@ export async function buildCCBLegacySelectMessage(season: string): Promise<Djs.B
         .setPlaceholder('Select a stage!');
     const componentRow = new Djs.ActionRowBuilder<Djs.StringSelectMenuBuilder>().addComponents(ccbSelector);
 
-    const names: string = gameConsts.ccbSeasons[season];
+    const names: string[] = gameConsts.ccbSeasons[season];
     for (const name of names) {
         ccbSelector.addOptions(new Djs.StringSelectMenuOptionBuilder()
             .setLabel(name)
@@ -240,6 +240,22 @@ export async function buildCCBLegacySelectMessage(season: string): Promise<Djs.B
     }
 
     return { content: `Please select a stage from CCB#${season} below:`, components: [componentRow] };
+}
+export async function buildCCBSelectMessage(season: T.CCSeason): Promise<Djs.BaseMessageOptions> {
+    const ccbSelector = new Djs.StringSelectMenuBuilder()
+        .setCustomId(createCustomId('ccb', 'select'))
+        .setPlaceholder('Select a stage!');
+    const componentRow = new Djs.ActionRowBuilder<Djs.StringSelectMenuBuilder>().addComponents(ccbSelector);
+
+    const names: string[] = Object.values(season.stageDict).map(x => x.excel.name);
+    for (const name of names) {
+        ccbSelector.addOptions(new Djs.StringSelectMenuOptionBuilder()
+            .setLabel(name)
+            .setValue(name.toLowerCase())
+        );
+    }
+
+    return { content: `Please select a stage from CCB#${season.seasonId[17]} below:`, components: [componentRow] };
 }
 export async function buildCurrentMessage(): Promise<Djs.BaseMessageOptions> {
     const skipLoginEvents = ['LOGIN_ONLY', 'CHECKIN_ONLY', 'FLOAT_PARADE', 'PRAY_ONLY', 'GRID_GACHA_V2', 'GRID_GACHA', 'BLESS_ONLY', 'CHECKIN_ACCESS'];

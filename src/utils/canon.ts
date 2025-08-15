@@ -1,6 +1,12 @@
 import * as T from 'hella-types';
 const { gameConsts } = require('../constants');
 
+export class CCSeason {
+    static isValid(season: T.CCSeason): boolean {
+        return !!season;
+    }
+}
+
 export class CCStage {
     static isValid(stage: T.CCStage): boolean {
         return !!stage && !!stage.excel && !!stage.levels;

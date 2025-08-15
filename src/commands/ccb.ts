@@ -2,8 +2,8 @@ import { AutocompleteInteraction, ButtonInteraction, CacheType, ChatInputCommand
 import Command from '../structures/Command';
 import * as api from '../utils/api';
 import { autocompleteCCB, autocompleteCCBLegacy } from '../utils/autocomplete';
-import { buildCCBLegacyMessage, buildCCBLegacySelectMessage, buildCCBMessage } from '../utils/build';
-import { CCStage, CCStageLegacy } from '../utils/canon';
+import { buildCCBLegacyMessage, buildCCBLegacySelectMessage, buildCCBMessage, buildCCBSelectMessage } from '../utils/build';
+import { CCSeason, CCStage, CCStageLegacy } from '../utils/canon';
 const { gameConsts } = require('../constants');
 
 export default class CCBCommand implements Command {
@@ -31,6 +31,7 @@ export default class CCBCommand implements Command {
                             { name: 'poo', value: 'poo' },
                             { name: '1', value: '1' },
                             { name: '2', value: '2' },
+                            { name: '3', value: '3' },
                         )
                 )
         ) as SlashCommandBuilder;
@@ -83,14 +84,24 @@ export default class CCBCommand implements Command {
             }
             case 'season': {
                 const index = interaction.options.getString('index').toLowerCase();
+                if (gameConsts.ccbSeasons.hasOwnProperty(index)) {
 
-                if (!gameConsts.ccbSeasons.hasOwnProperty(index))
-                    return await interaction.reply({ content: 'That season doesn\'t exist!', ephemeral: true });
+                    await interaction.deferReply();
 
-                await interaction.deferReply();
+                    const ccbSelectEmbed = await buildCCBLegacySelectMessage(index);
+                    return await interaction.editReply(ccbSelectEmbed);
+                }
+                else {
+                    const season = await api.single('ccb', { query: `crisis_v2_season_${index}_1` })
 
-                const ccbSelectEmbed = await buildCCBLegacySelectMessage(index);
-                return await interaction.editReply(ccbSelectEmbed);
+                    if (!CCSeason.isValid(season))
+                        return await interaction.reply({ content: 'That season doesn\'t exist!', ephemeral: true });
+
+                    await interaction.deferReply();
+
+                    const ccbSelectEmbed = await buildCCBSelectMessage(season);
+                    return await interaction.editReply(ccbSelectEmbed);
+                }
             }
         }
     }
