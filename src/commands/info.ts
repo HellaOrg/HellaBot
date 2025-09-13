@@ -26,7 +26,7 @@ export default class InfoCommand {
     }
     async execute(interaction: ChatInputCommandInteraction) {
         const name = interaction.options.getString('name').toLowerCase();
-        const op = await api.single('operator', { query: name, exclude: ['paradox'] });
+        const op = await api.single('operator', { query: name });
 
         if (!Operator.isValid(op))
             return await interaction.reply({ content: 'That operator doesn\'t exist!', ephemeral: true });
