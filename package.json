@@ -11,7 +11,7 @@
     "dependencies": {
         "discord.js": "^14.19.3",
         "dotenv": "^16.4.7",
-        "hella-types": "^0.2.10",
+        "hella-types": "^0.2.13",
         "puppeteer": "^24.1.1",
         "ts-node": "^10.9.2",
         "typescript": "^5.7.3",

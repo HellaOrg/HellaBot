@@ -107,7 +107,7 @@ export class GachaPool {
         return pool.client.gachaPoolName === 'Joint Operation';
     }
     static isNormal(pool: T.GachaPool): boolean {
-        return !this.isJointOperation(pool) && ['NORMAL', 'CLASSIC', 'LINKAGE', 'LIMITED', 'SINGLE'].includes(pool.client.gachaRuleType);
+        return !this.isJointOperation(pool) && ['NORMAL', 'DOUBLE', 'CLASSIC', 'CLASSIC_DOUBLE', 'LINKAGE', 'LIMITED', 'SINGLE'].includes(pool.client.gachaRuleType);
     }
 }
 
