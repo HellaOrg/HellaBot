@@ -7,16 +7,22 @@ import { autocompleteDeployable, autocompleteEnemy, autocompleteOperator } from 
 import { buildSpineDeployMessage, buildSpineEnemyMessage, buildSpineOperatorMessage } from '../utils/build';
 import { Deployable, Enemy, Operator } from '../utils/canon';
 import * as spineHelper from '../utils/spine/spineHelper';
-const { gameConsts, paths } = require('../constants');
+const { paths } = require('../constants');
 
 const fileExists = async (path: string) => !!(await promises.stat(path).catch(e => false));
 const getSkelAnims = skelData => skelData.animations.filter(animation => animation.name !== 'Default').map(animation => animation.name);
+
+const enemySpineIdOverride = {
+    "enemy_1037_lunsbr": "enemy_1037_lunsabr",
+    "enemy_1043_zomsbr": "enemy_1043_zomsabr",
+    "enemy_1043_zomsbr_2": "enemy_1043_zomsabr_2'"
+};
 
 async function enemyPageClose(browser, interaction, enemy, animArr, anim, random) {
     await new Promise(r => setTimeout(r, 1000));
     await browser.close();
 
-    const gifFile = join((gameConsts.enemySpineIdOverride[enemy.excel.enemyId] ?? enemy.excel.enemyId) + random + '.gif');
+    const gifFile = join((enemySpineIdOverride[enemy.excel.enemyId] ?? enemy.excel.enemyId) + random + '.gif');
     const gifPath = join(__dirname, '..', 'utils', 'spine', gifFile);
     const spineEmbed = await buildSpineEnemyMessage(gifFile, enemy, animArr, anim);
     await interaction.editReply(spineEmbed);

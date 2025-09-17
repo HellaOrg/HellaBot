@@ -259,6 +259,25 @@ export async function buildCCBSelectMessage(season: T.CCSeason): Promise<Djs.Bas
 }
 export async function buildCurrentMessage(): Promise<Djs.BaseMessageOptions> {
     const skipLoginEvents = ['LOGIN_ONLY', 'CHECKIN_ONLY', 'FLOAT_PARADE', 'PRAY_ONLY', 'GRID_GACHA_V2', 'GRID_GACHA', 'BLESS_ONLY', 'CHECKIN_ACCESS'];
+    const dailySupplyArr = [
+        ["Aerial Threat", "Cargo Escort", "Fearless Protection", "Solid Defense", "Tactical Drill", "Tough Siege", "Unstoppable Charge"],
+        ["Fierce Attack", "Resource Search", "Solid Defense", "Tactical Drill", "Tough Siege"],
+        ["Aerial Threat", "Cargo Escort", "Fearless Protection", "Fierce Attack", "Tactical Drill"], ["Aerial Threat", "Fearless Protection", "Resource Search", "Tactical Drill", "Unstoppable Charge"],
+        ["Cargo Escort", "Solid Defense", "Tactical Drill", "Tough Siege", "Unstoppable Charge"],
+        ["Aerial Threat", "Fierce Attack", "Resource Search", "Solid Defense", "Tactical Drill"],
+        ["Cargo Escort", "Fearless Protection", "Fierce Attack", "Resource Search", "Tactical Drill", "Tough Siege", "Unstoppable Charge"]
+    ];
+    const supplyDrops = {
+        "Aerial Threat": "Skill Summaries",
+        "Cargo Escort": "LMD",
+        "Fearless Protection": "Guard & Specialist Chips",
+        "Fierce Attack": "Caster & Sniper Chips",
+        "Resource Search": "Furniture & Building Materials",
+        "Solid Defense": "Medic & Defender Chips",
+        "Tactical Drill": "Battle Records",
+        "Tough Siege": "Purchase Certificates",
+        "Unstoppable Charge": "Vanguard & Supporter Chips"
+    };
 
     const now = new Date();
     const currTime = Math.floor(now.getTime() / 1000);
@@ -279,7 +298,7 @@ export async function buildCurrentMessage(): Promise<Djs.BaseMessageOptions> {
 
     const utc7Offset = -7 * 60; // UTC-7 offset in minutes
     const localTime = new Date(now.getTime() + (now.getTimezoneOffset() + utc7Offset) * 60000);
-    const dailySupply = gameConsts.dailySupply[localTime.getUTCDay()];
+    const dailySupply = dailySupplyArr[localTime.getUTCDay()];
 
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
@@ -297,7 +316,7 @@ export async function buildCurrentMessage(): Promise<Djs.BaseMessageOptions> {
         }
     }
 
-    const supplyString = dailySupply.map(s => `**${s}** - ${gameConsts.supplyDrops[s]}`).join('\n'); // todo: add emojis once those are done
+    const supplyString = dailySupply.map(s => `**${s}** - ${supplyDrops[s]}`).join('\n'); // todo: add emojis once those are done
     embed.addFields({ name: 'Today\'s Supply Stages', value: supplyString });
 
     return { embeds: [embed] };
@@ -399,7 +418,7 @@ export async function buildDeployMessage(deploy: T.Deployable, type: number, lev
 
             for (let i = 0; i < deploy.skills.find(s => s?.excel).excel.levels.length; i++) {
                 const levelOption = new Djs.StringSelectMenuOptionBuilder()
-                    .setLabel(gameConsts.longSkillLevels[i])
+                    .setLabel(gameConsts.skillLevels[i])
                     .setValue(i.toString())
                     .setDefault(i === level);
                 levelSelect.addOptions(levelOption);
@@ -737,7 +756,7 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
 
             for (let i = 0; i < op.skills[0].excel.levels.length; i++) {
                 const levelOption = new Djs.StringSelectMenuOptionBuilder()
-                    .setLabel(gameConsts.longSkillLevels[i])
+                    .setLabel(gameConsts.skillLevels[i])
                     .setValue(i.toString())
                     .setDefault(i === level);
                 levelSelect.addOptions(levelOption);
@@ -852,7 +871,7 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
 
                         for (let i = 0; i < op.skills[0].excel.levels.length; i++) {
                             const deployLevelOption = new Djs.StringSelectMenuOptionBuilder()
-                                .setLabel(`${gameConsts.longSkillLevels[i]}`)
+                                .setLabel(`${gameConsts.skillLevels[i]}`)
                                 .setValue(i.toString())
                                 .setDefault(i === deployLevel);
                             deployLevelSelect.addOptions(deployLevelOption);
@@ -1887,6 +1906,245 @@ function buildRangeString(range: T.GridRange): string {
     return rangeString;
 }
 function buildStageDiagramFields(stageData: T.StageData): Djs.EmbedField[] {
+    const tileDict = {
+        "unknown": {
+            "emoji": "❓",
+            "name": "Unknown Tile"
+        },
+        "tile_bigforce": {
+            "emoji": "💪",
+            "name": "Specialist Tactical Point"
+        },
+        "tile_corrosion": {
+            "emoji": "💔",
+            "name": "Corrosive Ground"
+        },
+        "tile_deepwater": {
+            "emoji": "🔷",
+            "name": "Deep Water Zone"
+        },
+        "tile_defup": {
+            "emoji": "🛡️",
+            "name": "Defensive Rune"
+        },
+        "tile_end": {
+            "emoji": "🟦",
+            "name": "Protection Objective"
+        },
+        "tile_fence": {
+            "emoji": "🟨",
+            "name": "Fence"
+        },
+        "tile_fence_bound": {
+            "emoji": "🟨",
+            "name": "Fence"
+        },
+        "tile_floor": {
+            "emoji": "❎",
+            "name": "Non-deployable Area"
+        },
+        "tile_flystart": {
+            "emoji": "🔴",
+            "name": "Aerial Unit Incursion Point"
+        },
+        "tile_forbidden": {
+            "emoji": "⬛",
+            "name": "No Entry Zone"
+        },
+        "tile_gazebo": {
+            "emoji": "🔫",
+            "name": "Anti-Air Rune"
+        },
+        "tile_grass": {
+            "emoji": "🌱",
+            "name": "Bush"
+        },
+        "tile_healing": {
+            "emoji": "💟",
+            "name": "Medical Rune"
+        },
+        "tile_hole": {
+            "emoji": "🔳",
+            "name": "Hole"
+        },
+        "tile_infection": {
+            "emoji": "☢️",
+            "name": "Active Originium"
+        },
+        "tile_rcm_crate": {
+            "emoji": "✅",
+            "name": "Recommended Roadblock Point"
+        },
+        "tile_rcm_operator": {
+            "emoji": "✅",
+            "name": "Recommended Deployment Point"
+        },
+        "tile_road": {
+            "emoji": "🟩",
+            "name": "Flat Ground"
+        },
+        "tile_shallowwater": {
+            "emoji": "💧",
+            "name": "Shallow Water Zone"
+        },
+        "tile_start": {
+            "emoji": "🟥",
+            "name": "Incursion Point"
+        },
+        "tile_telin": {
+            "emoji": "🔻",
+            "name": "Tunnel Entry"
+        },
+        "tile_telout": {
+            "emoji": "🔺",
+            "name": "Tunnel Exit"
+        },
+        "tile_volcano": {
+            "emoji": "🔥",
+            "name": "Heat Pump Passage"
+        },
+        "tile_volspread": {
+            "emoji": "🌋",
+            "name": "Lava Crack"
+        },
+        "tile_wall": {
+            "emoji": "⬜",
+            "name": "High Ground"
+        },
+        "tile_defbreak": {
+            "emoji": "💔",
+            "name": "Corrosive Ground"
+        },
+        "tile_smog": {
+            "emoji": "☁️",
+            "name": "Exhaust Grille"
+        },
+        "tile_yinyang_road": {
+            "emoji": "☯️",
+            "name": "Mark of Hui and Ming (Road)"
+        },
+        "tile_yinyang_wall": {
+            "emoji": "☯️",
+            "name": "Mark of Hui and Ming (Wall)"
+        },
+        "tile_yinyang_switch": {
+            "emoji": "☯️",
+            "name": "Mark of Dusk and Dawn"
+        },
+        "tile_poison": {
+            "emoji": "☠️",
+            "name": "Gas Spray"
+        },
+        "tile_deepsea": {
+            "emoji": "🔷",
+            "name": "Deep Water Zone"
+        },
+        "tile_icestr": {
+            "emoji": "🧊",
+            "name": "Icy Surface"
+        },
+        "tile_icetur_lb": {
+            "emoji": "🧊",
+            "name": "Icy Corner"
+        },
+        "tile_icetur_lt": {
+            "emoji": "🧊",
+            "name": "Icy Corner"
+        },
+        "tile_icetur_rb": {
+            "emoji": "🧊",
+            "name": "Icy Corner"
+        },
+        "tile_icetur_rt": {
+            "emoji": "🧊",
+            "name": "Icy Corner"
+        },
+        "tile_magic_circle": {
+            "emoji": "✨",
+            "name": "Activated \"Resonator\""
+        },
+        "tile_magic_circle_h": {
+            "emoji": "✨",
+            "name": "Activated \"Resonator\""
+        },
+        "tile_aircraft": {
+            "emoji": "🛫",
+            "name": "Aircraft"
+        },
+        "tile_creep": {
+            "emoji": "🟩",
+            "name": "Flat Ground (Nethersea Brand)"
+        },
+        "tile_creepf": {
+            "emoji": "❎",
+            "name": "Non-deployable Area (Nethersea Brand)"
+        },
+        "tile_empty": {
+            "emoji": "🔳",
+            "name": "Empty"
+        },
+        "tile_volcano_emp": {
+            "emoji": "🔥",
+            "name": "Heat Pump Passage"
+        },
+        "tile_reed": {
+            "emoji": "🟢",
+            "name": "Flat Ground (Reeds)"
+        },
+        "tile_reedf": {
+            "emoji": "🌱",
+            "name": "Non-deployable Area (Reeds)"
+        },
+        "tile_reedw": {
+            "emoji": "⚪",
+            "name": "High Ground (Reeds)"
+        },
+        "tile_mire": {
+            "emoji": "🟫",
+            "name": "Mire"
+        },
+        "tile_passable_wall": {
+            "emoji": "⬜",
+            "name": "Yumen Catastrophe Fortification"
+        },
+        "tile_passable_wall_forbidden": {
+            "emoji": "◽",
+            "name": "Yumen Catastrophe Fortification (Non-deployable)"
+        },
+        "tile_stairs": {
+            "emoji": "🪜",
+            "name": "Ladder"
+        },
+        "tile_water": {
+            "emoji": "🔷",
+            "name": "Clear Waters"
+        },
+        "tile_grvtybtn": {
+            "emoji": "⏹️",
+            "name": "Gravity Sensor"
+        },
+        "tile_woodrd": {
+            "emoji": "🪵",
+            "name": "Temporary Path"
+        },
+        "tile_flower": {
+            "emoji": "🟩",
+            "name": "Flat Ground (Flowerable)"
+        },
+        "tile_flowerf": {
+            "emoji": "❎",
+            "name": "Non-deployable Area (Flowerable)"
+        },
+        "tile_xbdpsea": {
+            "emoji": "🔷",
+            "name": "Deep Water Zone"
+        },
+        "tile_puddle": {
+            "emoji": "🔷",
+            "name": "Deep Water Zone"
+        }
+    };
+
     const map = stageData.mapData.map;
     const tiles = stageData.mapData.tiles;
     let mapString = '', legendArr = [];
@@ -1894,7 +2152,7 @@ function buildStageDiagramFields(stageData: T.StageData): Djs.EmbedField[] {
     for (let i = 0; i < map.length; i++) {
         for (let j = 0; j < map[0].length; j++) {
             const tileKey = tiles[map[i][j]].tileKey;
-            const tile = gameConsts.tileDict.hasOwnProperty(tileKey) ? gameConsts.tileDict[tileKey] : gameConsts.tileDict['unknown'];
+            const tile = tileDict.hasOwnProperty(tileKey) ? tileDict[tileKey] : tileDict['unknown'];
             mapString += tile.emoji;
 
             if (legendArr.includes(`${tile.emoji} - ${tile.name}`)) continue;
@@ -2147,6 +2405,18 @@ function buildDeployableComponents(deploy: T.Deployable): Djs.TextDisplayBuilder
     return deployableText;
 }
 async function buildSkillSections(deploy: T.Deployable, level: number, index: number = null): Promise<Djs.SectionBuilder[]> {
+    const spTypes = {
+        "INCREASE_WHEN_ATTACK": "Offensive",
+        "INCREASE_WHEN_TAKEN_DAMAGE": "Defensive",
+        "INCREASE_WITH_TIME": "Per Second",
+        "8": "Passive"
+    };
+    const skillTypes = {
+        "AUTO": "Auto Trigger",
+        "MANUAL": "Manual Trigger",
+        "PASSIVE": "Passive"
+    };
+
     const sections: Djs.SectionBuilder[] = [];
 
     const seenSkills = new Set();
@@ -2169,7 +2439,7 @@ async function buildSkillSections(deploy: T.Deployable, level: number, index: nu
 
         const content = [
             `### ${skillLevel.name}`,
-            `**${gameConsts.spTypes[skillLevel.spData.spType]} - ${gameConsts.skillTypes[skillLevel.skillType]}**`,
+            `**${spTypes[skillLevel.spData.spType]} - ${skillTypes[skillLevel.skillType]}**`,
             `***Initial:* ${skillLevel.spData.initSp} SP - *Cost:* ${skillLevel.spData.spCost} SP${(skillLevel.duration && skillLevel.duration > 0) ? ` - *Duration:* ${skillLevel.duration} sec` : ''}**`,
             insertBlackboard(skillLevel.description, skillLevel.blackboard)
         ];
@@ -2247,6 +2517,13 @@ function buildModuleSections(op: T.Operator, level: number): Djs.SectionBuilder[
     return sections;
 }
 function buildBaseSections(op: T.Operator): Djs.SectionBuilder[] {
+    const eliteLevels = {
+        "PHASE_0": "E0",
+        "PHASE_1": "E1",
+        "PHASE_2": "E2",
+        "PHASE_3": "E3"
+    };
+
     const sections = [];
 
     for (const base of op.bases) {
@@ -2258,7 +2535,7 @@ function buildBaseSections(op: T.Operator): Djs.SectionBuilder[] {
 
         const baseText = new Djs.TextDisplayBuilder()
             .setContent([
-                `### ${base.skill.buffName} - ${gameConsts.eliteLevels[base.condition.cond.phase]}`,
+                `### ${base.skill.buffName} - ${eliteLevels[base.condition.cond.phase]}`,
                 removeStyleTags(base.skill.description)
             ].join('\n'));
         section.addTextDisplayComponents(baseText);
@@ -2267,6 +2544,15 @@ function buildBaseSections(op: T.Operator): Djs.SectionBuilder[] {
     return sections;
 }
 async function buildCostSections(op: T.Operator, level: number): Promise<Djs.SectionBuilder[]> {
+    const evolveGoldCost = [
+        [0, 0],
+        [0, 0],
+        [10000, 0],
+        [15000, 60000],
+        [20000, 120000],
+        [30000, 180000]
+    ];
+
     const itemArr = await api.all('item', { include: ['data'] });
 
     const sections = [];
@@ -2287,7 +2573,7 @@ async function buildCostSections(op: T.Operator, level: number): Promise<Djs.Sec
                     .setContent([
                         `### Elite ${i}`,
                         buildCostString(op.data.phases[i].evolveCost, itemArr).slice(0, -1),
-                        `${getItemEmoji('GOLD')} LMD **x${gameConsts.evolveGoldCost[gameConsts.rarity[op.data.rarity]][i - 1]}**`
+                        `${getItemEmoji('GOLD')} LMD **x${evolveGoldCost[gameConsts.rarity[op.data.rarity]][i - 1]}**`
                     ].join('\n'));
                 section.addTextDisplayComponents(costText);
             }
