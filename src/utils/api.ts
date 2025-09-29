@@ -126,8 +126,12 @@ export async function about() {
     return (await res.json())[0];
 }
 
-export async function newEn() {
-    const path = new PathBuilder().route('new').toString();
+export async function newEn({ include, exclude }: { include?: string[], exclude?: string[] } = {}) {
+    const path = new PathBuilder()
+        .route('new')
+        .include(include)
+        .exclude(exclude)
+        .toString();
     const res = await fetch(path);
     if (!res.ok) return null;
     return (await res.json());

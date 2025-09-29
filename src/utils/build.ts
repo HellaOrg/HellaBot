@@ -1110,14 +1110,12 @@ export async function buildNewMessage(): Promise<Djs.BaseMessageOptions> {
     }
 
     const aboutInfo = await api.about();
-    const newInfo = await api.newEn();
+    const newInfo = await api.newEn({ include: ['archetype', 'operator', 'skin', 'module', 'paradox'] });
 
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
         .setTitle('Newly Updated Game Data')
-        .setDescription('Data fetched from: https://github.com/Kengxxiao/ArknightsGameData_YoStar\n' +
-            `Latest commit: \`${aboutInfo.hash}\`\n` +
-            `Last updated at: <t:${aboutInfo.date}>`);
+        .setDescription(`Last updated at: <t:${aboutInfo.date}>`);
 
     const archetypeString = newInfo.archetype
         ?.map(archetype => archetype.value)
