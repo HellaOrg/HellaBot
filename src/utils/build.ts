@@ -545,7 +545,7 @@ export async function buildEventListMessage(index: number): Promise<Djs.BaseMess
         filter: {
             'type': { 'nin': skipLoginEvents }
         }
-    })).sort((a, b) => b.startTime - a.startTime);
+    })).sort((a, b) => b.startTime - a.startTime || b.endTime - a.endTime);
 
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
@@ -598,7 +598,7 @@ export async function buildEventListMessage(index: number): Promise<Djs.BaseMess
 export async function buildGachaListMessage(index: number): Promise<Djs.BaseMessageOptions> {
     const bannerCount = 6;
     const timeArr = (await api.all('gacha', { include: ['client.gachaPoolId', 'client.openTime'] }))
-        .sort((a, b) => b.client.openTime - a.client.openTime);
+        .sort((a, b) => b.client.openTime - a.client.openTime || b.client.endTime - a.client.endTime);
     const bannerArr = await Promise.all(
         timeArr.slice(index * bannerCount, (index + 1) * bannerCount)
             .map(async time => await api.single('gacha', { query: time.client.gachaPoolId.toLowerCase() }))
@@ -2703,7 +2703,7 @@ async function buildStageComponents(stage: T.Stage | T.Paradox, level: number): 
 
     const titleText = new Djs.TextDisplayBuilder()
         .setContent([
-            `### ${stageInfo.name}`,
+            `### ${stageInfo.code} - ${stageInfo.name}`,
             removeStyleTags(stageInfo.description)
         ].join('\n'));
     text.push(titleText);
