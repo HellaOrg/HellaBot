@@ -540,7 +540,7 @@ export async function buildEnemyMessage(enemy: T.Enemy, level: number): Promise<
 export async function buildEventListMessage(index: number): Promise<Djs.BaseMessageOptions> {
     const eventCount = 6;
 
-    const skipLoginEvents = ['LOGIN_ONLY', 'CHECKIN_ONLY', 'FLOAT_PARADE', 'PRAY_ONLY', 'GRID_GACHA_V2', 'GRID_GACHA', 'BLESS_ONLY', 'CHECKIN_ACCESS'];
+    const skipLoginEvents = ['LOGIN_ONLY', 'CHECKIN_ONLY', 'FLOAT_PARADE', 'PRAY_ONLY', 'GRID_GACHA_V2', 'GRID_GACHA', 'BLESS_ONLY', 'CHECKIN_ACCESS', 'CHECKIN_VS'];
     const eventArr = (await api.searchV2('event', {
         filter: {
             'type': { 'nin': skipLoginEvents }
