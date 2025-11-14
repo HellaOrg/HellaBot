@@ -1914,7 +1914,7 @@ function buildRangeString(range: T.GridRange): string {
         }
         rangeString += '\n';
     }
-    return rangeString;
+    return rangeString.slice(0, -1);
 }
 function buildStageDiagramFields(stageData: T.StageData): Djs.EmbedField[] {
     const tileDict = {
@@ -2351,7 +2351,7 @@ async function buildTitleSection(deploy: T.Deployable, extendedStats: boolean = 
             titleContent.push(
                 '',
                 '**Range**',
-                buildRangeString(deploy.range).slice(0, -1),
+                buildRangeString(deploy.range),
             );
         }
         if (C.Deployable.hasTalents(deploy)) {
