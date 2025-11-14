@@ -285,15 +285,19 @@ export async function buildCurrentMessage(): Promise<Djs.BaseMessageOptions> {
         filter: {
             'client.openTime': { '<=': currTime },
             'client.endTime': { '>=': currTime }
-        }
-    })).sort((a, b) => a.client.endTime - b.client.endTime);
+        },
+        sort: { 'client.endTime': 'asc' },
+        limit: 6
+    }));
     const currEvents = (await api.searchV2('event', {
         filter: {
             'startTime': { '<=': currTime },
             'endTime': { '>=': currTime },
             'type': { 'nin': skipLoginEvents }
         },
-    })).sort((a, b) => a.endTime - b.endTime);
+        sort: { 'endTime': 'asc' },
+        limit: 6
+    }));
     const opNames = await api.all('operator', { include: ['id', 'data.name'] });
 
     const utc7Offset = -7 * 60; // UTC-7 offset in minutes
@@ -540,12 +544,16 @@ export async function buildEnemyMessage(enemy: T.Enemy, level: number): Promise<
 export async function buildEventListMessage(index: number): Promise<Djs.BaseMessageOptions> {
     const eventCount = 6;
 
-    const skipLoginEvents = ['LOGIN_ONLY', 'CHECKIN_ONLY', 'FLOAT_PARADE', 'PRAY_ONLY', 'GRID_GACHA_V2', 'GRID_GACHA', 'BLESS_ONLY', 'CHECKIN_ACCESS'];
+    const skipLoginEvents = ['LOGIN_ONLY', 'CHECKIN_ONLY', 'FLOAT_PARADE', 'PRAY_ONLY', 'GRID_GACHA_V2', 'GRID_GACHA', 'BLESS_ONLY', 'CHECKIN_ACCESS', 'CHECKIN_VS'];
     const eventArr = (await api.searchV2('event', {
         filter: {
             'type': { 'nin': skipLoginEvents }
+        },
+        sort: {
+            'startTime': 'desc',
+            'endTime': 'desc'
         }
-    })).sort((a, b) => b.startTime - a.startTime || b.endTime - a.endTime);
+    }));
 
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
@@ -597,8 +605,13 @@ export async function buildEventListMessage(index: number): Promise<Djs.BaseMess
 }
 export async function buildGachaListMessage(index: number): Promise<Djs.BaseMessageOptions> {
     const bannerCount = 6;
-    const timeArr = (await api.all('gacha', { include: ['client.gachaPoolId', 'client.openTime'] }))
-        .sort((a, b) => b.client.openTime - a.client.openTime || b.client.endTime - a.client.endTime);
+    const timeArr = (await api.all('gacha', {
+        include: ['client.gachaPoolId', 'client.openTime'],
+        sort: {
+            'client.openTime': 'desc',
+            'client.endTime': 'desc'
+        }
+    }));
     const bannerArr = await Promise.all(
         timeArr.slice(index * bannerCount, (index + 1) * bannerCount)
             .map(async time => await api.single('gacha', { query: time.client.gachaPoolId.toLowerCase() }))
@@ -716,7 +729,7 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             extendedStats: false
         }
     };
-    const typesArr = Object.values(typesDict);
+    const typesArr = Object.values(typesDict).sort((a, b) => a.index - b.index);
 
     const container = new Djs.ContainerBuilder().setAccentColor(embedColour);
 
@@ -917,7 +930,7 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
         case typesDict.modules.index: {
             level = C.Operator.clampModuleLevelIndex(op, level);
 
-            const sections = buildModuleSections(op, level);
+            const sections = await buildModuleSections(op, level);
             for (const section of sections) {
                 container.addSectionComponents(section);
                 container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
@@ -1901,7 +1914,7 @@ function buildRangeString(range: T.GridRange): string {
         }
         rangeString += '\n';
     }
-    return rangeString;
+    return rangeString.slice(0, -1);
 }
 function buildStageDiagramFields(stageData: T.StageData): Djs.EmbedField[] {
     const tileDict = {
@@ -2338,7 +2351,7 @@ async function buildTitleSection(deploy: T.Deployable, extendedStats: boolean = 
             titleContent.push(
                 '',
                 '**Range**',
-                buildRangeString(deploy.range).slice(0, -1),
+                buildRangeString(deploy.range),
             );
         }
         if (C.Deployable.hasTalents(deploy)) {
@@ -2457,7 +2470,7 @@ async function buildSkillSections(deploy: T.Deployable, level: number, index: nu
 
     return sections;
 }
-function buildModuleSections(op: T.Operator, level: number): Djs.SectionBuilder[] {
+async function buildModuleSections(op: T.Operator, level: number): Promise<Djs.SectionBuilder[]> {
     const sections: Djs.SectionBuilder[] = [];
 
     for (let i = 0; i < op.modules.length; i++) {
@@ -2480,6 +2493,14 @@ function buildModuleSections(op: T.Operator, level: number): Djs.SectionBuilder[
                 const upgradeDesc = insertBlackboard(candidate.upgradeDescription, candidate.blackboard);
                 if (upgradeDesc !== '') {
                     talentDescription = upgradeDesc;
+                }
+                if (candidate.rangeId) {
+                    const range = await api.single('range', { query: candidate.rangeId });
+                    description.push(
+                        '',
+                        '**Range**',
+                        buildRangeString(range)
+                    );
                 }
             }
         }
