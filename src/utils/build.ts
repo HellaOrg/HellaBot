@@ -285,15 +285,19 @@ export async function buildCurrentMessage(): Promise<Djs.BaseMessageOptions> {
         filter: {
             'client.openTime': { '<=': currTime },
             'client.endTime': { '>=': currTime }
-        }
-    })).sort((a, b) => a.client.endTime - b.client.endTime);
+        },
+        sort: { 'client.endTime': 'asc' },
+        limit: 6
+    }));
     const currEvents = (await api.searchV2('event', {
         filter: {
             'startTime': { '<=': currTime },
             'endTime': { '>=': currTime },
             'type': { 'nin': skipLoginEvents }
         },
-    })).sort((a, b) => a.endTime - b.endTime);
+        sort: { 'endTime': 'asc' },
+        limit: 6
+    }));
     const opNames = await api.all('operator', { include: ['id', 'data.name'] });
 
     const utc7Offset = -7 * 60; // UTC-7 offset in minutes
@@ -544,8 +548,12 @@ export async function buildEventListMessage(index: number): Promise<Djs.BaseMess
     const eventArr = (await api.searchV2('event', {
         filter: {
             'type': { 'nin': skipLoginEvents }
+        },
+        sort: {
+            'startTime': 'desc',
+            'endTime': 'desc'
         }
-    })).sort((a, b) => b.startTime - a.startTime || b.endTime - a.endTime);
+    }));
 
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
@@ -597,8 +605,13 @@ export async function buildEventListMessage(index: number): Promise<Djs.BaseMess
 }
 export async function buildGachaListMessage(index: number): Promise<Djs.BaseMessageOptions> {
     const bannerCount = 6;
-    const timeArr = (await api.all('gacha', { include: ['client.gachaPoolId', 'client.openTime'] }))
-        .sort((a, b) => b.client.openTime - a.client.openTime || b.client.endTime - a.client.endTime);
+    const timeArr = (await api.all('gacha', {
+        include: ['client.gachaPoolId', 'client.openTime'],
+        sort: {
+            'client.openTime': 'desc',
+            'client.endTime': 'desc'
+        }
+    }));
     const bannerArr = await Promise.all(
         timeArr.slice(index * bannerCount, (index + 1) * bannerCount)
             .map(async time => await api.single('gacha', { query: time.client.gachaPoolId.toLowerCase() }))
