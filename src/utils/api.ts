@@ -27,7 +27,7 @@ type MatchParams = {
     exclude?: string[];
 };
 type SearchV2Filter = {
-    [key: string]: any | { [key: string]: any | { [key: string]: any[] } }
+    [key: string]: any | SearchV2Filter | any[];
 };
 type SearchV2Params = {
     filter: SearchV2Filter;
