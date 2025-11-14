@@ -729,7 +729,7 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             extendedStats: false
         }
     };
-    const typesArr = Object.values(typesDict);
+    const typesArr = Object.values(typesDict).sort((a, b) => a.index - b.index);
 
     const container = new Djs.ContainerBuilder().setAccentColor(embedColour);
 
