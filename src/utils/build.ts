@@ -930,7 +930,7 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
         case typesDict.modules.index: {
             level = C.Operator.clampModuleLevelIndex(op, level);
 
-            const sections = buildModuleSections(op, level);
+            const sections = await buildModuleSections(op, level);
             for (const section of sections) {
                 container.addSectionComponents(section);
                 container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
@@ -2470,7 +2470,7 @@ async function buildSkillSections(deploy: T.Deployable, level: number, index: nu
 
     return sections;
 }
-function buildModuleSections(op: T.Operator, level: number): Djs.SectionBuilder[] {
+async function buildModuleSections(op: T.Operator, level: number): Promise<Djs.SectionBuilder[]> {
     const sections: Djs.SectionBuilder[] = [];
 
     for (let i = 0; i < op.modules.length; i++) {
@@ -2493,6 +2493,14 @@ function buildModuleSections(op: T.Operator, level: number): Djs.SectionBuilder[
                 const upgradeDesc = insertBlackboard(candidate.upgradeDescription, candidate.blackboard);
                 if (upgradeDesc !== '') {
                     talentDescription = upgradeDesc;
+                }
+                if (candidate.rangeId) {
+                    const range = await api.single('range', { query: candidate.rangeId });
+                    description.push(
+                        '',
+                        '**Range**',
+                        buildRangeString(range)
+                    );
                 }
             }
         }
