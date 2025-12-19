@@ -850,30 +850,17 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
                             container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
                         }
 
-                        const firstSkip = Array(20).fill(true);
                         for (const component of deployMessage.components[0].components) {
                             switch (component.data.type) {
                                 case Djs.ComponentType.Section: {
-                                    if (firstSkip[component.data.type]) {
-                                        firstSkip[component.data.type] = false;
-                                        continue;
-                                    }
                                     container.addSectionComponents(component as Djs.SectionBuilder);
                                     break;
                                 }
                                 case Djs.ComponentType.TextDisplay: {
-                                    if (firstSkip[component.data.type]) {
-                                        firstSkip[component.data.type] = false;
-                                        continue;
-                                    }
                                     container.addTextDisplayComponents(component as Djs.TextDisplayBuilder);
                                     break;
                                 }
                                 case Djs.ComponentType.Separator: {
-                                    if (firstSkip[component.data.type]) {
-                                        firstSkip[component.data.type] = false;
-                                        continue;
-                                    }
                                     container.addSeparatorComponents(component as Djs.SeparatorBuilder);
                                     break;
                                 }
