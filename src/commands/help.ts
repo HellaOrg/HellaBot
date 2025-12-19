@@ -1,6 +1,6 @@
-import { ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
+import { AutocompleteInteraction, ChatInputCommandInteraction, SlashCommandBuilder } from 'discord.js';
 import Command from '../structures/Command';
-import { globalCommands } from '../structures/HellaBot';
+import { autocompleteHelp } from '../utils/autocomplete';
 import { buildHelpListMessage, buildHelpMessage } from '../utils/build';
 
 export default class HelpCommand implements Command {
@@ -10,9 +10,7 @@ export default class HelpCommand implements Command {
         .addStringOption(option =>
             option.setName('command')
                 .setDescription('Command name')
-                // .addChoices(
-                //     ...Object.values(globalCommands).map(command => { return { name: command.data.name, value: command.data.name } })
-                // )
+                .setAutocomplete(true)
         ) as SlashCommandBuilder;
     name = 'Help';
     description = ['Show information on commands. If no command is specified, show a list of all commands.'];
@@ -20,6 +18,11 @@ export default class HelpCommand implements Command {
         '`/help`',
         '`/help [command]`'
     ];
+    async autocomplete(interaction: AutocompleteInteraction) {
+        const value = interaction.options.getFocused().toLowerCase();
+        const arr = await autocompleteHelp(value);
+        return await interaction.respond(arr);
+    }
     async execute(interaction: ChatInputCommandInteraction) {
         const name = interaction.options.getString('command')?.toLowerCase();
 

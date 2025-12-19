@@ -1,7 +1,7 @@
 import * as Djs from 'discord.js';
 import type * as T from "hella-types";
 import { join } from 'path';
-import { globalCommands, globalEmojis } from '../structures/HellaBot';
+import HellaBot from '../structures/HellaBot';
 import * as api from './api';
 import * as C from './canon';
 import * as pstats from './penguin-stats';
@@ -14,15 +14,17 @@ const removeStyleTags = (text: string) => text ? text.replace(/<.[a-z]{2,5}?\.[^
 const urlExists = async (url: string) => (await fetch(url)).status === 200;
 function getItemEmoji(item: T.Item | string): string {
     if (typeof item === 'string')
-        return globalEmojis[item] ? `<:${item}:${globalEmojis[item].id}>` : '';
-    return globalEmojis[item.data.iconId] ? `<:${item.data.iconId}:${globalEmojis[item.data.iconId].id}>` : '';
+        return HellaBot.emojis.get(item) ? `<:${item}:${HellaBot.emojis.get(item).id}>` : '';
+    return HellaBot.emojis.get(item.data.iconId) ? `<:${item.data.iconId}:${HellaBot.emojis.get(item.data.iconId).id}>` : '';
 }
 function getOpPrettyName(op: T.Operator, { rarity = true, emoji = true, name = true } = {}): string {
     let string = '';
     if (rarity)
         string += `${gameConsts.rarity[op.data.rarity] + 1}★ `;
-    if (emoji)
-        string += globalEmojis[op.id] ? `<:${op.id}:${globalEmojis[op.id].id}> ` : '';
+    if (emoji) {
+        const opEmoji = HellaBot.getOperatorEmoji(op);
+        string += opEmoji ? `<:${op.id}:${opEmoji.id}> ` : '';
+    }
     if (name)
         string += op.data.name;
     return string;
@@ -420,7 +422,7 @@ export async function buildDeployMessage(deploy: T.Deployable, type: number, lev
                 .setCustomId(createCustomId('deploy', deploy.id, type, 'select'));
             levelRow.addComponents(levelSelect);
 
-            for (let i = 0; i < deploy.skills.find(s => s?.excel).excel.levels.length; i++) {
+            for (let i = deploy.skills.find(s => s?.excel).excel.levels.length - 1; i >= 0; i--) {
                 const levelOption = new Djs.StringSelectMenuOptionBuilder()
                     .setLabel(gameConsts.skillLevels[i])
                     .setValue(i.toString())
@@ -667,7 +669,7 @@ export async function buildGachaListMessage(index: number): Promise<Djs.BaseMess
     return { embeds: [embed], components: [componentRow] };
 }
 export async function buildHelpMessage(name: string): Promise<Djs.BaseMessageOptions> {
-    const command = globalCommands[name];
+    const command = HellaBot.commands.get(name);
 
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
@@ -681,7 +683,7 @@ export async function buildHelpListMessage(): Promise<Djs.BaseMessageOptions> {
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
         .setTitle('Help Menu');
-    embed.addFields({ name: 'Command List', value: Object.values(globalCommands).map(command => `\`${command.data.name}\``).join(', ') });
+    embed.addFields({ name: 'Command List', value: HellaBot.commands.map(command => `\`${command.data.name}\``).join(', ') });
     embed.addFields({ name: blankChar, value: 'For more information on a specific command, use `/help [command]`' });
 
     return { embeds: [embed] };
@@ -744,6 +746,8 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
     switch (type) {
         default:
         case typesDict.stats.index: {
+            if (!C.Operator.hasStats(op)) break;
+
             level = 0;
 
             const components = buildDeployableComponents(op);
@@ -752,6 +756,8 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             break;
         }
         case typesDict.skills.index: {
+            if (!C.Operator.hasSkills(op)) break;
+
             level = C.Operator.clampSkillLevelIndex(op, level);
 
             const sections = await buildSkillSections(op, level);
@@ -767,7 +773,7 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
                 .setCustomId(createCustomId('info', op.id, type, 'select'));
             levelRow.addComponents(levelSelect);
 
-            for (let i = 0; i < op.skills[0].excel.levels.length; i++) {
+            for (let i = op.skills[0].excel.levels.length - 1; i >= 0; i--) {
                 const levelOption = new Djs.StringSelectMenuOptionBuilder()
                     .setLabel(gameConsts.skillLevels[i])
                     .setValue(i.toString())
@@ -777,6 +783,8 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             break;
         }
         case typesDict.deploy.index: { // holy shit this is a mess
+            if (!C.Operator.hasDeployables(op)) break;
+
             extras = [extras?.[0] ?? 0, extras?.[1] ?? 0, extras?.[2] ?? 0];
 
             if (op.skills.every(s => !C.Skill.hasDeployable(s))) { // if an operator does not have summons that are tied to a skill, assume they only have one summon (eg. Deepcolor)
@@ -842,30 +850,17 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
                             container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
                         }
 
-                        const firstSkip = Array(20).fill(true);
                         for (const component of deployMessage.components[0].components) {
                             switch (component.data.type) {
                                 case Djs.ComponentType.Section: {
-                                    if (firstSkip[component.data.type]) {
-                                        firstSkip[component.data.type] = false;
-                                        continue;
-                                    }
                                     container.addSectionComponents(component as Djs.SectionBuilder);
                                     break;
                                 }
                                 case Djs.ComponentType.TextDisplay: {
-                                    if (firstSkip[component.data.type]) {
-                                        firstSkip[component.data.type] = false;
-                                        continue;
-                                    }
                                     container.addTextDisplayComponents(component as Djs.TextDisplayBuilder);
                                     break;
                                 }
                                 case Djs.ComponentType.Separator: {
-                                    if (firstSkip[component.data.type]) {
-                                        firstSkip[component.data.type] = false;
-                                        continue;
-                                    }
                                     container.addSeparatorComponents(component as Djs.SeparatorBuilder);
                                     break;
                                 }
@@ -882,7 +877,7 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
                             .setCustomId(createCustomId('info', op.id, type, level, deploySkill, deployType, 'select'));
                         deployLevelRow.addComponents(deployLevelSelect);
 
-                        for (let i = 0; i < op.skills[0].excel.levels.length; i++) {
+                        for (let i = op.skills[0].excel.levels.length - 1; i >= 0; i--) {
                             const deployLevelOption = new Djs.StringSelectMenuOptionBuilder()
                                 .setLabel(`${gameConsts.skillLevels[i]}`)
                                 .setValue(i.toString())
@@ -928,6 +923,8 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             break;
         }
         case typesDict.modules.index: {
+            if (!C.Operator.hasModules(op)) break;
+
             level = C.Operator.clampModuleLevelIndex(op, level);
 
             const sections = await buildModuleSections(op, level);
@@ -953,6 +950,8 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             break;
         }
         case typesDict.base.index: {
+            if (!C.Operator.hasBases(op)) break;
+
             level = 0;
 
             const sections = buildBaseSections(op);
@@ -963,6 +962,8 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             break;
         }
         case typesDict.costs.index: {
+            if (!C.Operator.hasCosts(op)) break;
+
             const levelsArr = [
                 {
                     label: 'Promotions',
@@ -1009,6 +1010,8 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             break;
         }
         case typesDict.outfits.index: {
+            if (!C.Operator.hasSkins(op)) break;
+
             if (level === 99) level = 0;
             level = C.Operator.clampSkinIndex(op, level);
 
@@ -1034,6 +1037,8 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             break;
         }
         case typesDict.paradox.index: {
+            if (!C.Operator.hasParadox(op)) break;
+
             level = C.Paradox.clampIndex(level);
 
             const components = await buildStageComponents(op.paradox, level);
@@ -1352,7 +1357,7 @@ export async function buildRecruitMessage(value: number, tags: string[], select:
     return [{ content: '', embeds: [qualEmbed], components: qualComponents }, { content: '', embeds: [tagEmbed], components: tagComponents }, { content: '', embeds: [recruitEmbed], components: utilComponents }];
 }
 export async function buildRogueRelicMessage(relic: T.RogueRelic): Promise<Djs.BaseMessageOptions> {
-    const description = `***Cost:* ${relic.value}▲**\n${relic.description !== null ? `${relic.usage}\n\n${relic.description}` : relic.usage}`;
+    const description = `${relic.description !== null ? `${relic.usage}\n\n${relic.description}` : relic.usage}`;
 
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
@@ -2451,7 +2456,7 @@ async function buildSkillSections(deploy: T.Deployable, level: number, index: nu
         const content = [
             `### ${skillLevel.name}`,
             `**${spTypes[skillLevel.spData.spType]} - ${skillTypes[skillLevel.skillType]}**`,
-            `***Initial:* ${skillLevel.spData.initSp} SP - *Cost:* ${skillLevel.spData.spCost} SP${(skillLevel.duration && skillLevel.duration > 0) ? ` - *Duration:* ${skillLevel.duration} sec` : ''}**`,
+            `***Initial:* \`${skillLevel.spData.initSp}\` SP - *Cost:* \`${skillLevel.spData.spCost}\` SP${(skillLevel.duration && skillLevel.duration > 0) ? ` - *Duration:* \`${skillLevel.duration}\` sec` : ''}**`,
             insertBlackboard(skillLevel.description, skillLevel.blackboard)
         ];
         if (skillLevel.rangeId) {
