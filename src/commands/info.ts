@@ -12,7 +12,20 @@ export default class InfoCommand {
             option.setName('name')
                 .setDescription('Operator name')
                 .setRequired(true)
-                .setAutocomplete(true)
+                .setAutocomplete(true))
+        .addStringOption(option =>
+            option.setName('page')
+                .setDescription('Info page')
+                .addChoices(
+                    { name: 'Stats', value: '0' },
+                    { name: 'Skills', value: '1' },
+                    { name: 'Deployables', value: '7' },
+                    { name: 'Modules', value: '2' },
+                    { name: 'Base Skills', value: '3' },
+                    { name: 'Upgrade Costs', value: '4' },
+                    { name: 'Outfits', value: '5' },
+                    { name: 'Paradox Simulation', value: '6' },
+                )
         ) as SlashCommandBuilder;
     name = 'Info';
     description = ['Show information on an operator, including stats, talents, skills, modules, and more.'];
@@ -26,6 +39,7 @@ export default class InfoCommand {
     }
     async execute(interaction: ChatInputCommandInteraction) {
         const name = interaction.options.getString('name').toLowerCase();
+        const page = parseInt(interaction.options.getString('page') ?? '0');
         const op = await api.single('operator', { query: name });
 
         if (!Operator.isValid(op))
@@ -33,7 +47,7 @@ export default class InfoCommand {
 
         await interaction.deferReply();
 
-        const operatorEmbed = await buildInfoMessage(op);
+        const operatorEmbed = await buildInfoMessage(op, page);
         return await interaction.editReply(operatorEmbed);
     }
     async selectResponse(interaction: StringSelectMenuInteraction<CacheType>, idArr: string[]) {

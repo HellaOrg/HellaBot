@@ -422,7 +422,7 @@ export async function buildDeployMessage(deploy: T.Deployable, type: number, lev
                 .setCustomId(createCustomId('deploy', deploy.id, type, 'select'));
             levelRow.addComponents(levelSelect);
 
-            for (let i = 0; i < deploy.skills.find(s => s?.excel).excel.levels.length; i++) {
+            for (let i = deploy.skills.find(s => s?.excel).excel.levels.length - 1; i >= 0; i--) {
                 const levelOption = new Djs.StringSelectMenuOptionBuilder()
                     .setLabel(gameConsts.skillLevels[i])
                     .setValue(i.toString())
@@ -746,6 +746,8 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
     switch (type) {
         default:
         case typesDict.stats.index: {
+            if (!C.Operator.hasStats(op)) break;
+
             level = 0;
 
             const components = buildDeployableComponents(op);
@@ -754,6 +756,8 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             break;
         }
         case typesDict.skills.index: {
+            if (!C.Operator.hasSkills(op)) break;
+
             level = C.Operator.clampSkillLevelIndex(op, level);
 
             const sections = await buildSkillSections(op, level);
@@ -769,7 +773,7 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
                 .setCustomId(createCustomId('info', op.id, type, 'select'));
             levelRow.addComponents(levelSelect);
 
-            for (let i = 0; i < op.skills[0].excel.levels.length; i++) {
+            for (let i = op.skills[0].excel.levels.length - 1; i >= 0; i--) {
                 const levelOption = new Djs.StringSelectMenuOptionBuilder()
                     .setLabel(gameConsts.skillLevels[i])
                     .setValue(i.toString())
@@ -779,6 +783,8 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             break;
         }
         case typesDict.deploy.index: { // holy shit this is a mess
+            if (!C.Operator.hasDeployables(op)) break;
+
             extras = [extras?.[0] ?? 0, extras?.[1] ?? 0, extras?.[2] ?? 0];
 
             if (op.skills.every(s => !C.Skill.hasDeployable(s))) { // if an operator does not have summons that are tied to a skill, assume they only have one summon (eg. Deepcolor)
@@ -884,7 +890,7 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
                             .setCustomId(createCustomId('info', op.id, type, level, deploySkill, deployType, 'select'));
                         deployLevelRow.addComponents(deployLevelSelect);
 
-                        for (let i = 0; i < op.skills[0].excel.levels.length; i++) {
+                        for (let i = op.skills[0].excel.levels.length - 1; i >= 0; i--) {
                             const deployLevelOption = new Djs.StringSelectMenuOptionBuilder()
                                 .setLabel(`${gameConsts.skillLevels[i]}`)
                                 .setValue(i.toString())
@@ -930,6 +936,8 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             break;
         }
         case typesDict.modules.index: {
+            if (!C.Operator.hasModules(op)) break;
+
             level = C.Operator.clampModuleLevelIndex(op, level);
 
             const sections = await buildModuleSections(op, level);
@@ -955,6 +963,8 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             break;
         }
         case typesDict.base.index: {
+            if (!C.Operator.hasBases(op)) break;
+
             level = 0;
 
             const sections = buildBaseSections(op);
@@ -965,6 +975,8 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             break;
         }
         case typesDict.costs.index: {
+            if (!C.Operator.hasCosts(op)) break;
+
             const levelsArr = [
                 {
                     label: 'Promotions',
@@ -1011,6 +1023,8 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             break;
         }
         case typesDict.outfits.index: {
+            if (!C.Operator.hasSkins(op)) break;
+
             if (level === 99) level = 0;
             level = C.Operator.clampSkinIndex(op, level);
 
@@ -1036,6 +1050,8 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             break;
         }
         case typesDict.paradox.index: {
+            if (!C.Operator.hasParadox(op)) break;
+
             level = C.Paradox.clampIndex(level);
 
             const components = await buildStageComponents(op.paradox, level);
@@ -2453,7 +2469,7 @@ async function buildSkillSections(deploy: T.Deployable, level: number, index: nu
         const content = [
             `### ${skillLevel.name}`,
             `**${spTypes[skillLevel.spData.spType]} - ${skillTypes[skillLevel.skillType]}**`,
-            `***Initial:* ${skillLevel.spData.initSp} SP - *Cost:* ${skillLevel.spData.spCost} SP${(skillLevel.duration && skillLevel.duration > 0) ? ` - *Duration:* ${skillLevel.duration} sec` : ''}**`,
+            `***Initial:* \`${skillLevel.spData.initSp}\` SP - *Cost:* \`${skillLevel.spData.spCost}\` SP${(skillLevel.duration && skillLevel.duration > 0) ? ` - *Duration:* \`${skillLevel.duration}\` sec` : ''}**`,
             insertBlackboard(skillLevel.description, skillLevel.blackboard)
         ];
         if (skillLevel.rangeId) {
