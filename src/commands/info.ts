@@ -1,4 +1,4 @@
-import { AutocompleteInteraction, ButtonInteraction, CacheType, ChatInputCommandInteraction, SlashCommandBuilder, StringSelectMenuInteraction } from 'discord.js';
+import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction, SlashCommandBuilder, StringSelectMenuInteraction } from 'discord.js';
 import * as api from '../utils/api';
 import { autocompleteOperator } from '../utils/autocomplete';
 import { buildInfoMessage } from '../utils/build';

@@ -1,7 +1,7 @@
 import * as Djs from 'discord.js';
 import type * as T from "hella-types";
 import { join } from 'path';
-import { globalCommands, globalEmojis } from '../structures/HellaBot';
+import HellaBot from '../structures/HellaBot';
 import * as api from './api';
 import * as C from './canon';
 import * as pstats from './penguin-stats';
@@ -14,15 +14,17 @@ const removeStyleTags = (text: string) => text ? text.replace(/<.[a-z]{2,5}?\.[^
 const urlExists = async (url: string) => (await fetch(url)).status === 200;
 function getItemEmoji(item: T.Item | string): string {
     if (typeof item === 'string')
-        return globalEmojis[item] ? `<:${item}:${globalEmojis[item].id}>` : '';
-    return globalEmojis[item.data.iconId] ? `<:${item.data.iconId}:${globalEmojis[item.data.iconId].id}>` : '';
+        return HellaBot.emojis.get(item) ? `<:${item}:${HellaBot.emojis.get(item).id}>` : '';
+    return HellaBot.emojis.get(item.data.iconId) ? `<:${item.data.iconId}:${HellaBot.emojis.get(item.data.iconId).id}>` : '';
 }
 function getOpPrettyName(op: T.Operator, { rarity = true, emoji = true, name = true } = {}): string {
     let string = '';
     if (rarity)
         string += `${gameConsts.rarity[op.data.rarity] + 1}★ `;
-    if (emoji)
-        string += globalEmojis[op.id] ? `<:${op.id}:${globalEmojis[op.id].id}> ` : '';
+    if (emoji) {
+        const opEmoji = HellaBot.getOperatorEmoji(op);
+        string += opEmoji ? `<:${op.id}:${opEmoji.id}> ` : '';
+    }
     if (name)
         string += op.data.name;
     return string;
@@ -667,7 +669,7 @@ export async function buildGachaListMessage(index: number): Promise<Djs.BaseMess
     return { embeds: [embed], components: [componentRow] };
 }
 export async function buildHelpMessage(name: string): Promise<Djs.BaseMessageOptions> {
-    const command = globalCommands[name];
+    const command = HellaBot.commands.get(name);
 
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
@@ -681,7 +683,7 @@ export async function buildHelpListMessage(): Promise<Djs.BaseMessageOptions> {
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
         .setTitle('Help Menu');
-    embed.addFields({ name: 'Command List', value: Object.values(globalCommands).map(command => `\`${command.data.name}\``).join(', ') });
+    embed.addFields({ name: 'Command List', value: HellaBot.commands.map(command => `\`${command.data.name}\``).join(', ') });
     embed.addFields({ name: blankChar, value: 'For more information on a specific command, use `/help [command]`' });
 
     return { embeds: [embed] };
@@ -1352,7 +1354,7 @@ export async function buildRecruitMessage(value: number, tags: string[], select:
     return [{ content: '', embeds: [qualEmbed], components: qualComponents }, { content: '', embeds: [tagEmbed], components: tagComponents }, { content: '', embeds: [recruitEmbed], components: utilComponents }];
 }
 export async function buildRogueRelicMessage(relic: T.RogueRelic): Promise<Djs.BaseMessageOptions> {
-    const description = `***Cost:* ${relic.value}▲**\n${relic.description !== null ? `${relic.usage}\n\n${relic.description}` : relic.usage}`;
+    const description = `${relic.description !== null ? `${relic.usage}\n\n${relic.description}` : relic.usage}`;
 
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)

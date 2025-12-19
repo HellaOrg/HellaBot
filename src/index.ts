@@ -5,7 +5,7 @@ const cmdArgs = process.argv.slice(2);
 const noReg = cmdArgs.includes('noreg');
 
 async function main() {
-    const bot = await HellaBot.create(token, clientId, disabled, noReg);
+    await HellaBot.create(token, clientId, disabled, noReg);
 }
 
 main();

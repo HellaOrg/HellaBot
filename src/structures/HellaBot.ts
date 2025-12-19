@@ -1,41 +1,26 @@
 import { ActivityType, ApplicationEmoji, Client, Collection, Events, GatewayIntentBits, REST, Routes } from 'discord.js';
 import { readdirSync } from 'fs';
+import { Operator } from 'hella-types';
 import { join } from 'path';
 import * as api from '../utils/api';
 import Command from './Command';
 const { paths } = require('../constants');
 
-export const globalCommands: { [key: string]: Command } = {};
-export const globalEmojis: { [key: string]: ApplicationEmoji } = {};
-
 export default class HellaBot {
-    token: string;
-    clientId: string;
-    disabled: { [key: string]: boolean };
-    client: Client;
-    commands = new Collection<string, Command>();
+    static commands = new Collection<string, Command>();
+    static emojis = new Collection<string, ApplicationEmoji>();
+    static nonregisteredEmojis = {};
+
+    static token: string;
+    static clientId: string;
+    static disabled: { [key: string]: boolean };
+    static client: Client;
 
     public static async create(token: string, clientId: string, disabled: { [key: string]: boolean }, skipRegister: boolean = false) {
-        const bot = new HellaBot(token, clientId, disabled);
-        bot.client.once(Events.ClientReady, async client => {
-            client.user.setActivity('CC#13', { type: ActivityType.Competing });
-            await Promise.all([
-                bot.registerCommands(skipRegister),
-                bot.registerEmojis(skipRegister)
-            ]);
-            console.log(`Ready! Logged in as ${bot.client.user.tag}`);
-        });
-        await bot.client.login(token);
-        return bot;
-    }
-
-    private constructor(token: string, clientId: string, disabled: { [key: string]: boolean }) {
         this.token = token;
         this.clientId = clientId;
         this.disabled = disabled;
-
         this.client = new Client({ intents: [GatewayIntentBits.Guilds] });
-
         this.client.on(Events.InteractionCreate, async interaction => {
             if (interaction.isChatInputCommand()) {
                 const command = this.commands.get(interaction.commandName);
@@ -81,18 +66,20 @@ export default class HellaBot {
                 }
             }
         });
+        this.client.once(Events.ClientReady, async client => {
+            client.user.setActivity('CC#13', { type: ActivityType.Competing });
+            await Promise.all([
+                this.registerCommands(skipRegister),
+                this.registerEmojis(skipRegister)
+            ]);
+            console.log(`Ready! Logged in as ${this.client.user.tag}`);
+        });
+        await this.client.login(token);
     }
 
-    private async registerCommands(skipRegister: boolean) {
+    private static async registerCommands(skipRegister: boolean) {
         const commandArr = [];
         const commandFiles = readdirSync(join(__dirname, '..', 'commands')).filter(file => file.endsWith('.ts'));
-        for (const file of commandFiles) {
-            const command = new (await import(join(__dirname, '..', 'commands', file))).default();
-
-            if (this.disabled && this.disabled[command.data.name.toLowerCase()]) continue;
-
-            globalCommands[command.data.name] = command; // MUST be loaded first for help command options to work
-        }
         for (const file of commandFiles) {
             const command = new (await import(join(__dirname, '..', 'commands', file))).default();
 
@@ -101,7 +88,6 @@ export default class HellaBot {
             this.commands.set(command.data.name, command);
             commandArr.push(command.data.toJSON());
         }
-
         if (!skipRegister) {
             try {
                 const rest = new REST().setToken(this.token);
@@ -109,7 +95,6 @@ export default class HellaBot {
             } catch (err) {
                 console.error(err);
             }
-
             console.log('Registered application commands');
         }
         else {
@@ -117,7 +102,26 @@ export default class HellaBot {
         }
     }
 
-    private async registerEmojis(skipRegister: boolean) {
+    public static getOperatorEmoji(op: Operator) {
+        const emoji = this.emojis.get(op.id);
+        if (!emoji)
+            this.registerNewOperatorEmoji(op); // not awaited for faster response
+        return emoji;
+    }
+
+    public static async registerNewOperatorEmoji(op: Operator) {
+        if (this.nonregisteredEmojis[op.id]) return;
+        this.nonregisteredEmojis[op.id] = true;
+        try {
+            await this.client.application.emojis.create({ attachment: `${paths.myAssetUrl}/operator/avatars/${op.id}.png`, name: op.id });
+            this.client.application.emojis.fetch().then(emojis => emojis.values().forEach(emoji => this.emojis.set(emoji.name, emoji)));
+        } catch (err) {
+            console.error(err);
+        }
+        this.nonregisteredEmojis[op.id] = false;
+    }
+
+    private static async registerEmojis(skipRegister: boolean) {
         const emojis = await this.client.application.emojis.fetch();
         const emojiDict = Object.fromEntries(emojis.map(emoji => [emoji.name, true]));
 
@@ -133,11 +137,9 @@ export default class HellaBot {
                     }
                 }
             }
-
             const items = (await api.searchV2('item', { filter: { 'data.itemType': { 'in': ['MATERIAL', 'CARD_EXP'] } }, include: ['data'] }))
                 .filter(item => !item.data.name.includes('Token') && !item.data.itemId.includes('token') && !item.data.iconId.includes('token'))
                 .sort((a, b) => a.data.sortId - b.data.sortId);
-
             for (const item of items) {
                 if (!item.data.iconId) continue;
                 if (!emojiDict[item.data.iconId]) {
@@ -148,7 +150,6 @@ export default class HellaBot {
                     }
                 }
             }
-
             const lmd = await api.single('item', { query: '4001' });
             if (!emojiDict[lmd.data.iconId]) {
                 try {
@@ -157,16 +158,11 @@ export default class HellaBot {
                     console.error(err);
                 }
             }
-
             console.log('Registered application emojis');
         }
         else {
             console.log('Skipped emoji registration');
         }
-
-        const finalEmojis = await this.client.application.emojis.fetch();
-        for (const emoji of finalEmojis) {
-            globalEmojis[emoji[1].name] = emoji[1];
-        }
+        this.client.application.emojis.fetch().then(emojis => emojis.values().forEach(emoji => this.emojis.set(emoji.name, emoji)));
     }
 }

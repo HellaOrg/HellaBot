@@ -1,4 +1,6 @@
 import * as T from "hella-types";
+import Command from "../structures/Command";
+import HellaBot from '../structures/HellaBot';
 import * as api from "./api";
 const { gameConsts } = require('../constants');
 
@@ -58,6 +60,15 @@ export async function autocompleteEnemy({ query, include = [] }: AutocompletePar
         .filter(callback)
         .slice(0, limit)
         .map(enemy => ({ name: `${enemy.excel.enemyIndex} - ${enemy.excel.name}`, value: enemy.excel.enemyId }));
+}
+export async function autocompleteHelp(query: string, callback: (e: Command) => boolean = () => true) {
+    const matchQuery = (command: Command) => splitMatch(command.name, query);
+
+    return Array.from(HellaBot.commands
+        .filter(command => callback(command) && matchQuery(command))
+        .values())
+        .slice(0, limit)
+        .map(command => ({ name: command.name, value: command.name.toLowerCase() }))
 }
 export async function autocompleteRogueRelic(theme: rogueTheme, { query, include = [] }: AutocompleteParams, callback: (e: T.RogueRelic) => boolean = () => true) {
     const requiredInclude = ['id', 'name'];
