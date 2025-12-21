@@ -782,7 +782,7 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             }
             break;
         }
-        case typesDict.deploy.index: { // holy shit this is a mess
+        case typesDict.deploy.index: {
             if (!C.Operator.hasDeployables(op)) break;
 
             extras = [extras?.[0] ?? 0];
