@@ -703,7 +703,7 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
         deploy: {
             label: 'Deployables', index: 7, value: '7',
             enabled: C.Operator.hasDeployables(op),
-            extendedStats: false
+            extendedStats: true
         },
         modules: {
             label: 'Modules', index: 2, value: '2',
@@ -785,129 +785,36 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
         case typesDict.deploy.index: { // holy shit this is a mess
             if (!C.Operator.hasDeployables(op)) break;
 
-            extras = [extras?.[0] ?? 0, extras?.[1] ?? 0, extras?.[2] ?? 0];
+            extras = [extras?.[0] ?? 0];
 
             if (op.skills.every(s => !C.Skill.hasDeployable(s))) { // if an operator does not have summons that are tied to a skill, assume they only have one summon (eg. Deepcolor)
-                const deployType = extras[1];
-                const deployLevel = C.Operator.clampSkillLevelIndex(op, extras[2]);
                 const deploy = await api.single('deployable', { query: Object.keys(op.data.displayTokenDict)[0] });
 
-                const deployMessage = await buildDeployMessage(deploy, deployType, deployLevel);
-                for (const component of deployMessage.components[0].components) {
-                    switch (component.data.type) {
-                        case Djs.ComponentType.Section: {
-                            container.addSectionComponents(component as Djs.SectionBuilder);
-                            break;
-                        }
-                        case Djs.ComponentType.TextDisplay: {
-                            container.addTextDisplayComponents(component as Djs.TextDisplayBuilder);
-                            break;
-                        }
-                        case Djs.ComponentType.Separator: {
-                            container.addSeparatorComponents(component as Djs.SeparatorBuilder);
-                            break;
-                        }
-                        default: {
-                            break;
-                        }
-                    }
-                }
+                const titleSection = await buildTitleSection(deploy, true);
+                container.addSectionComponents(titleSection);
+                container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
+
+                const statSection = buildDeployableComponents(deploy);
+                container.addTextDisplayComponents(statSection);
+                container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
             }
             else {
                 const deploySkill = C.Operator.clampSkillHasDeployableIndex(op, extras[0]);
-                const deployType = extras[1];
-                const deployLevel = C.Operator.clampSkillLevelIndex(op, extras[2]);
+                const deployLevel = C.Operator.clampSkillLevelIndex(op, 99);
                 const deploy = await api.single('deployable', { query: op.skills[deploySkill].deploy.overrideTokenKey });
 
-                const deployMessage = await buildDeployMessage(deploy, deployType, deployLevel);
-                switch (deployType) {
-                    case typesDict.stats.index: {
-                        for (const component of deployMessage.components[0].components) {
-                            switch (component.data.type) {
-                                case Djs.ComponentType.Section: {
-                                    container.addSectionComponents(component as Djs.SectionBuilder);
-                                    break;
-                                }
-                                case Djs.ComponentType.TextDisplay: {
-                                    container.addTextDisplayComponents(component as Djs.TextDisplayBuilder);
-                                    break;
-                                }
-                                case Djs.ComponentType.Separator: {
-                                    container.addSeparatorComponents(component as Djs.SeparatorBuilder);
-                                    break;
-                                }
-                                default: {
-                                    break;
-                                }
-                            }
-                        }
-                        break;
-                    }
-                    case typesDict.skills.index: {
-                        const skillSections = await buildSkillSections(op, deployLevel, deploySkill);
-                        for (const section of skillSections) {
-                            container.addSectionComponents(section);
-                            container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
-                        }
-
-                        for (const component of deployMessage.components[0].components) {
-                            switch (component.data.type) {
-                                case Djs.ComponentType.Section: {
-                                    container.addSectionComponents(component as Djs.SectionBuilder);
-                                    break;
-                                }
-                                case Djs.ComponentType.TextDisplay: {
-                                    container.addTextDisplayComponents(component as Djs.TextDisplayBuilder);
-                                    break;
-                                }
-                                case Djs.ComponentType.Separator: {
-                                    container.addSeparatorComponents(component as Djs.SeparatorBuilder);
-                                    break;
-                                }
-                                default: {
-                                    break;
-                                }
-                            }
-                        }
-
-                        const deployLevelRow = new Djs.ActionRowBuilder<Djs.StringSelectMenuBuilder>();
-                        container.addActionRowComponents(deployLevelRow);
-
-                        const deployLevelSelect = new Djs.StringSelectMenuBuilder()
-                            .setCustomId(createCustomId('info', op.id, type, level, deploySkill, deployType, 'select'));
-                        deployLevelRow.addComponents(deployLevelSelect);
-
-                        for (let i = op.skills[0].excel.levels.length - 1; i >= 0; i--) {
-                            const deployLevelOption = new Djs.StringSelectMenuOptionBuilder()
-                                .setLabel(`${gameConsts.skillLevels[i]}`)
-                                .setValue(i.toString())
-                                .setDefault(i === deployLevel);
-                            deployLevelSelect.addOptions(deployLevelOption);
-                        }
-                    }
-                }
-
-                const deployTypeRow = new Djs.ActionRowBuilder<Djs.StringSelectMenuBuilder>();
-                container.addActionRowComponents(deployTypeRow);
-
-                const typeSelect = new Djs.StringSelectMenuBuilder()
-                    .setCustomId(createCustomId('info', op.id, type, level, deploySkill, 'select', 99));
-                deployTypeRow.addComponents(typeSelect);
-
-                for (const typeLabel of Object.values(typesDict).splice(0, 2)) {
-                    if (!typeLabel.enabled) continue;
-                    const deployTypeOption = new Djs.StringSelectMenuOptionBuilder()
-                        .setLabel(`Deployable - ${typeLabel.label}`)
-                        .setValue(typeLabel.value)
-                        .setDefault(typeLabel.index === deployType);
-                    typeSelect.addOptions(deployTypeOption);
+                const opSkillSections = await buildSkillSections(op, deployLevel, deploySkill);
+                for (const skillSection of opSkillSections) {
+                    container.addSectionComponents(skillSection);
+                    container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
                 }
 
                 const deploySkillRow = new Djs.ActionRowBuilder<Djs.StringSelectMenuBuilder>();
                 container.addActionRowComponents(deploySkillRow);
+                container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
 
                 const deploySkillSelect = new Djs.StringSelectMenuBuilder()
-                    .setCustomId(createCustomId('info', op.id, type, level, 'select', deployType, deployLevel));
+                    .setCustomId(createCustomId('info', op.id, type, level, 'select'));
                 deploySkillRow.addComponents(deploySkillSelect);
 
                 for (let i = 0; i < op.skills.length; i++) {
@@ -918,6 +825,20 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
                         .setValue(i.toString())
                         .setDefault(i === deploySkill);
                     deploySkillSelect.addOptions(deploySkillOption);
+                }
+
+                const titleSection = await buildTitleSection(deploy, true);
+                container.addSectionComponents(titleSection);
+                container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
+
+                const statSection = buildDeployableComponents(deploy);
+                container.addTextDisplayComponents(statSection);
+                container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
+
+                const deploySkillSections = await buildSkillSections(deploy, deployLevel);
+                for (const skillSection of deploySkillSections) {
+                    container.addSectionComponents(skillSection);
+                    container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
                 }
             }
             break;
