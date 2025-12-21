@@ -2328,15 +2328,10 @@ async function buildStageEnemyComponents(stageData: T.StageData): Promise<Djs.Te
 async function buildTitleSection(deploy: T.Deployable, extendedStats: boolean = false): Promise<Djs.SectionBuilder> {
     const section = new Djs.SectionBuilder();
 
-    const opThumb = `${paths.myAssetUrl}/operator/avatars/${deploy.id}.png`;
-    const deployThumb = `${paths.aceshipImageUrl}/avatars/${deploy.id}.png`;
-    let avatarThumb = await urlExists(opThumb) ? opThumb : deployThumb;
+    let avatarThumb = `${paths.myAssetUrl}/operator/avatars/${deploy.id}.png`;
     if (deploy.id === 'char_1037_amiya3') avatarThumb = paths.myAssetUrl + `/operator/avatars/char_1037_amiya3_2.png`;
-    // sections MUST have a thumbnail/button, for now add it in even if it doesnt exist
-    // if (await urlExists(avatarThumb)) {
     const titleThumb = new Djs.ThumbnailBuilder({ media: { url: avatarThumb } });
     section.setThumbnailAccessory(titleThumb);
-    // }
 
     let description = removeStyleTags(deploy.data.description);
     if (C.Deployable.hasTrait(deploy)) {
