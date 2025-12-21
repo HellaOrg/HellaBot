@@ -8,7 +8,7 @@ type AutocompleteParams = {
     query: string;
     include?: string[];
 };
-type rogueTheme = 0 | 1 | 2 | 3;
+type rogueTheme = 0 | 1 | 2 | 3 | 4;
 type sandTheme = 0;
 const limit = 6;
 const splitMatch = (str: string, query: string) => str.toLowerCase().includes(query.toLowerCase()) || str.toLowerCase().split('\'').join('').includes(query.toLowerCase());
