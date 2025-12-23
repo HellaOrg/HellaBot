@@ -1073,7 +1073,7 @@ export async function buildNewMessage(): Promise<Djs.BaseMessageOptions> {
     const skinString = (await Promise.all(newInfo.skin
         ?.filter(skin => skin.value.displaySkin.skinName)
         .map(async skin => {
-            const op = await getOp(skin.value.charId);
+            const op = await getOp(skin.value.tmplId ? skin.value.tmplId : skin.value.charId); // amiyas use tmplId instead of charId
             return `${opName(op)} - ${skin.value.displaySkin.skinName}`;
         })))
         .sort().reverse()
