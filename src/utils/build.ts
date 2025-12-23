@@ -389,7 +389,7 @@ export async function buildDeployMessage(deploy: T.Deployable, type: number, lev
 
     const container = new Djs.ContainerBuilder().setAccentColor(embedColour);
 
-    const titleSection = await buildTitleSection(deploy, typesArr[type].extendedStats);
+    const titleSection = buildTitleSection(deploy, typesArr[type].extendedStats);
     container.addSectionComponents(titleSection);
     container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
 
@@ -735,7 +735,7 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
 
     const container = new Djs.ContainerBuilder().setAccentColor(embedColour);
 
-    const titleSection = await buildTitleSection(op, typesArr[type].extendedStats);
+    const titleSection = buildTitleSection(op, typesArr[type].extendedStats);
     container.addSectionComponents(titleSection);
     container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
 
@@ -787,59 +787,47 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
 
             extras = [extras?.[0] ?? 0];
 
-            if (op.skills.every(s => !C.Skill.hasDeployable(s))) { // if an operator does not have summons that are tied to a skill, assume they only have one summon (eg. Deepcolor)
-                const deploy = await api.single('deployable', { query: Object.keys(op.data.displayTokenDict)[0] });
+            // ops may have multiple skill-attached deploys (ling, raidian) or a single skill-independent deploy (phantom, deepcolor)
+            const skillAttachedDeploys = !op.skills.every(s => !C.Skill.hasDeployable(s));
+            const skillIndex = C.Operator.clampSkillIndex(op, extras[0]);
+            const skillLevel = C.Operator.clampSkillLevelIndex(op, 99);
+            const deploy = await api.single('deployable', { query: skillAttachedDeploys ? op.skills[skillIndex]?.deploy.overrideTokenKey : Object.keys(op.data.displayTokenDict)[0] });
 
-                const titleSection = await buildTitleSection(deploy, true);
-                container.addSectionComponents(titleSection);
-                container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
-
-                const statSection = buildDeployableComponents(deploy);
-                container.addTextDisplayComponents(statSection);
+            const opSkillSections = await buildSkillSections(op, skillLevel, skillIndex);
+            for (const skillSection of opSkillSections) {
+                container.addSectionComponents(skillSection);
                 container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
             }
-            else {
-                const deploySkill = C.Operator.clampSkillHasDeployableIndex(op, extras[0]);
-                const deployLevel = C.Operator.clampSkillLevelIndex(op, 99);
-                const deploy = await api.single('deployable', { query: op.skills[deploySkill].deploy.overrideTokenKey });
 
-                const opSkillSections = await buildSkillSections(op, deployLevel, deploySkill);
-                for (const skillSection of opSkillSections) {
-                    container.addSectionComponents(skillSection);
-                    container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
-                }
+            const opSkillRow = new Djs.ActionRowBuilder<Djs.StringSelectMenuBuilder>();
+            container.addActionRowComponents(opSkillRow);
+            container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
 
-                const deploySkillRow = new Djs.ActionRowBuilder<Djs.StringSelectMenuBuilder>();
-                container.addActionRowComponents(deploySkillRow);
+            const opSkillSelect = new Djs.StringSelectMenuBuilder()
+                .setCustomId(createCustomId('info', op.id, type, level, 'select'));
+            opSkillRow.addComponents(opSkillSelect);
+
+            for (let i = 0; i < op.skills.length; i++) {
+                if (skillAttachedDeploys && !C.Skill.hasDeployable(op.skills[i])) continue;
+                const deploySkillOption = new Djs.StringSelectMenuOptionBuilder()
+                    .setLabel(`Skill ${i + 1}`)
+                    .setValue(i.toString())
+                    .setDefault(i === skillIndex);
+                opSkillSelect.addOptions(deploySkillOption);
+            }
+
+            const titleSection = buildTitleSection(deploy, true);
+            container.addSectionComponents(titleSection);
+            container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
+
+            const statSection = buildDeployableComponents(deploy);
+            container.addTextDisplayComponents(statSection);
+            container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
+
+            const deploySkillSections = await buildSkillSections(deploy, skillLevel, skillIndex);
+            for (const skillSection of deploySkillSections) {
+                container.addSectionComponents(skillSection);
                 container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
-
-                const deploySkillSelect = new Djs.StringSelectMenuBuilder()
-                    .setCustomId(createCustomId('info', op.id, type, level, 'select'));
-                deploySkillRow.addComponents(deploySkillSelect);
-
-                for (let i = 0; i < op.skills.length; i++) {
-                    if (!C.Skill.hasDeployable(op.skills[i])) continue;
-
-                    const deploySkillOption = new Djs.StringSelectMenuOptionBuilder()
-                        .setLabel(`Skill ${i + 1}`)
-                        .setValue(i.toString())
-                        .setDefault(i === deploySkill);
-                    deploySkillSelect.addOptions(deploySkillOption);
-                }
-
-                const titleSection = await buildTitleSection(deploy, true);
-                container.addSectionComponents(titleSection);
-                container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
-
-                const statSection = buildDeployableComponents(deploy);
-                container.addTextDisplayComponents(statSection);
-                container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
-
-                const deploySkillSections = await buildSkillSections(deploy, deployLevel);
-                for (const skillSection of deploySkillSections) {
-                    container.addSectionComponents(skillSection);
-                    container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
-                }
             }
             break;
         }
@@ -2246,7 +2234,7 @@ async function buildStageEnemyComponents(stageData: T.StageData): Promise<Djs.Te
     return section;
 }
 
-async function buildTitleSection(deploy: T.Deployable, extendedStats: boolean = false): Promise<Djs.SectionBuilder> {
+function buildTitleSection(deploy: T.Deployable, extendedStats: boolean = false): Djs.SectionBuilder {
     const section = new Djs.SectionBuilder();
 
     let avatarThumb = `${paths.myAssetUrl}/operator/avatars/${deploy.id}.png`;
