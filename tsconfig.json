@@ -2,9 +2,14 @@
     "compilerOptions": {
         "allowJs": false,
         "target": "ESNext",
-        "module": "CommonJS"
+        "module": "CommonJS",
+        "noImplicitAny": false,
+        "strictNullChecks": false
     },
     "include": [
         "src/**/*.ts"
+    ],
+    "exclude": [
+        "src/utils/spine"
     ]
 }
