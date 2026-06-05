@@ -47,7 +47,7 @@ export default class InfoCommand {
 
         await interaction.deferReply();
 
-        const operatorEmbed = await buildInfoMessage(op, page);
+        const operatorEmbed = await buildInfoMessage(op, page, [1, 2].find(x => x === page) ? 99 : 0);
         return await interaction.editReply(operatorEmbed);
     }
     async selectResponse(interaction: StringSelectMenuInteraction<CacheType>, idArr: string[]) {
