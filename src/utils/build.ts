@@ -1787,6 +1787,9 @@ function buildEventField(event: T.GameEvent): Djs.EmbedField {
     }
     return { name: event.name, value: eventString, inline: false };
 }
+function buildFactionString(deploy: T.Deployable): string {
+    return deploy.factions.map(faction => faction.powerName).join(', ');
+}
 function buildRangeString(range: T.GridRange): string {
     let left = 0, right = 0, top = 0, bottom = 0;
     for (const square of range.grids) {
@@ -2256,6 +2259,13 @@ function buildTitleSection(deploy: T.Deployable, extendedStats: boolean = false)
         description
     ]
     if (extendedStats) {
+        if (C.Deployable.hasFactions(deploy)) {
+            titleContent.push(
+                '',
+                '**Factions**',
+                buildFactionString(deploy),
+            );
+        }
         if (C.Deployable.hasRange(deploy)) {
             titleContent.push(
                 '',
