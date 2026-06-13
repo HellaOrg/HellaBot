@@ -1788,7 +1788,7 @@ function buildEventField(event: T.GameEvent): Djs.EmbedField {
     return { name: event.name, value: eventString, inline: false };
 }
 function buildFactionString(deploy: T.Deployable): string {
-    return deploy.factions.map(faction => faction.powerName).join(', ');
+    return deploy.factions.map(faction => Object.values(faction).filter(power => !!power).map(power => power.powerName).join(' - ')).join('\n');
 }
 function buildRangeString(range: T.GridRange): string {
     let left = 0, right = 0, top = 0, bottom = 0;
