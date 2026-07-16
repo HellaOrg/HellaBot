@@ -105,7 +105,7 @@ export default class HellaBot {
     public static getOperatorEmoji(op: Operator) {
         const emoji = this.emojis.get(op.id);
         if (!emoji)
-            this.registerNewOperatorEmoji(op); // not awaited for faster response
+            this.registerNewOperatorEmoji(op); // dont await, register in background
         return emoji;
     }
 
@@ -151,7 +151,7 @@ export default class HellaBot {
                 }
             }
             const lmd = await api.single('item', { query: '4001' });
-            if (!emojiDict[lmd.data.iconId]) {
+            if (lmd && !emojiDict[lmd.data.iconId]) {
                 try {
                     await this.client.application.emojis.create({ attachment: `${paths.myAssetUrl}/items/${lmd.data.iconId}.png`, name: lmd.data.iconId });
                 } catch (err) {

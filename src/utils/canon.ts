@@ -48,6 +48,12 @@ export class Deployable {
         if (skillLevel > maxLevel) return maxLevel;
         return skillLevel;
     }
+    static clampSkinIndex(deploy: T.Deployable, skin: number): number {
+        if (skin < 0) return 0;
+        const maxIndex = deploy.skins.findLastIndex(s => Skin.isValid(s));
+        if (skin > maxIndex) return maxIndex;
+        return skin;
+    }
     static containsSkin(deploy: T.Deployable, skin: string): boolean {
         return skin === 'default' || deploy.skins.some(s => s.battleSkin.skinOrPrefabId.toLowerCase() === skin || s.displaySkin.skinName?.toLowerCase() === skin);
     }
@@ -141,12 +147,6 @@ export class Operator extends Deployable {
         const maxIndex = op.modules.find(m => Module.isValid(m))?.data.phases.length - 1;
         if (module > maxIndex) return maxIndex;
         return module;
-    }
-    static clampSkinIndex(op: T.Operator, skin: number): number {
-        if (skin < 0) return 0;
-        const maxIndex = op.skins.findLastIndex(s => Skin.isValid(s));
-        if (skin > maxIndex) return maxIndex;
-        return skin;
     }
     static hasBases(op: T.Operator): boolean {
         return !!op.bases && !!op.bases.length;

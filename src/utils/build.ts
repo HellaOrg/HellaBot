@@ -1,6 +1,7 @@
 import * as Djs from 'discord.js';
 import type * as T from "hella-types";
 import { join } from 'path';
+import Command from '../structures/Command';
 import HellaBot from '../structures/HellaBot';
 import * as api from './api';
 import * as C from './canon';
@@ -670,9 +671,7 @@ export async function buildGachaListMessage(index: number): Promise<Djs.BaseMess
 
     return { embeds: [embed], components: [componentRow] };
 }
-export async function buildHelpMessage(name: string): Promise<Djs.BaseMessageOptions> {
-    const command = HellaBot.commands.get(name);
-
+export async function buildHelpMessage(command: Command): Promise<Djs.BaseMessageOptions> {
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
         .setTitle(command.name)
@@ -775,7 +774,7 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
                 .setCustomId(createCustomId('info', op.id, type, 'select'));
             levelRow.addComponents(levelSelect);
 
-            for (let i = op.skills[0].excel.levels.length - 1; i >= 0; i--) {
+            for (let i = op.skills.find(s => s?.excel)?.excel.levels.length - 1; i >= 0; i--) {
                 const levelOption = new Djs.StringSelectMenuOptionBuilder()
                     .setLabel(gameConsts.skillLevels[i])
                     .setValue(i.toString())
