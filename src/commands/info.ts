@@ -1,10 +1,11 @@
 import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction, SlashCommandBuilder, StringSelectMenuInteraction } from 'discord.js';
+import Command from '../structures/Command';
 import * as api from '../utils/api';
 import { autocompleteOperator } from '../utils/autocomplete';
 import { buildInfoMessage } from '../utils/build';
 import { Operator } from '../utils/canon';
 
-export default class InfoCommand {
+export default class InfoCommand implements Command {
     data = new SlashCommandBuilder()
         .setName('info')
         .setDescription('Show an operator\'s information and attributes')

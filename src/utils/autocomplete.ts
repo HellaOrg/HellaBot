@@ -134,7 +134,7 @@ export async function autocompleteItem({ query, include = [] }: AutocompletePara
         .slice(0, limit)
         .map(item => ({ name: item.data.name, value: item.data.itemId }));
 }
-export async function autocompleteOperator({ query, include = [] }: AutocompleteParams, callback: (e: T.Operator) => Boolean = () => true) {
+export async function autocompleteOperator({ query, include = [] }: AutocompleteParams, callback: (e: T.Operator) => boolean = () => true) {
     const requiredInclude = ['id', 'data.name'];
 
     return (await api.match('operator', { query, include: requiredInclude.concat(include) }))

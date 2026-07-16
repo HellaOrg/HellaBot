@@ -9,7 +9,7 @@ const innerIndex = 4;
 const outerIndex = innerIndex + 2;
 const outerName = 'Sui\'s Garden of Grotesqueries';
 
-export default class IS5Command implements Command {
+export default class IS6Command implements Command {
     data = new SlashCommandBuilder()
         .setName(`is${outerIndex}`)
         .setDescription(`Show information on IS${outerIndex}: ${outerName}`)

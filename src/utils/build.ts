@@ -407,6 +407,8 @@ export async function buildDeployMessage(deploy: T.Deployable, type: number, lev
             break;
         }
         case typesDict.skills.index: {
+            if (!C.Deployable.hasSkills(deploy)) break;
+
             level = C.Deployable.clampSkillLevelIndex(deploy, level);
 
             const sections = await buildSkillSections(deploy, level);
@@ -422,7 +424,7 @@ export async function buildDeployMessage(deploy: T.Deployable, type: number, lev
                 .setCustomId(createCustomId('deploy', deploy.id, type, 'select'));
             levelRow.addComponents(levelSelect);
 
-            for (let i = deploy.skills.find(s => s?.excel).excel.levels.length - 1; i >= 0; i--) {
+            for (let i = deploy.skills.find(s => s?.excel)?.excel.levels.length - 1; i >= 0; i--) {
                 const levelOption = new Djs.StringSelectMenuOptionBuilder()
                     .setLabel(gameConsts.skillLevels[i])
                     .setValue(i.toString())
@@ -1019,7 +1021,7 @@ export async function buildItemMessage(item: T.Item): Promise<Djs.BaseMessageOpt
         const formulaString = buildCostString(item.formula.costs, await api.all('item'));
         embed.addFields({ name: 'Crafting Formula', value: formulaString, inline: true });
     }
-    const imagePath = paths.myAssetUrl + `/ items / ${item.data.iconId}.png`;
+    const imagePath = paths.myAssetUrl + `/items/${item.data.iconId}.png`;
     if (await urlExists(imagePath))
         embed.setThumbnail(imagePath);
 
@@ -1794,11 +1796,11 @@ function buildRangeString(range: T.GridRange): string {
     let left = 0, right = 0, top = 0, bottom = 0;
     for (const square of range.grids) {
         if (square.col < left)
-            left = square.col
+            left = square.col;
         else if (square.col > right)
             right = square.col;
         if (square.row < bottom)
-            bottom = square.row
+            bottom = square.row;
         else if (square.row > top)
             top = square.row;
     }
@@ -1810,9 +1812,9 @@ function buildRangeString(range: T.GridRange): string {
         rangeArr[i] = new Array(arrRows);
     }
     for (const square of range.grids) {
-        rangeArr[square.col - left][-square.row - bottom] = 1;
+        rangeArr[square.col - left][top - square.row] = 1;
     }
-    rangeArr[-left][-bottom] = 2;
+    rangeArr[-left][-bottom] = 2; // works as long as these are zero or negative, which they should be
 
     let rangeString = '';
     for (let i = 0; i < arrRows; i++) {
@@ -2498,7 +2500,7 @@ async function buildCostSections(op: T.Operator, level: number): Promise<Djs.Sec
     switch (level) {
         default:
         case 0: {
-            for (let i = 0; i < op.data.phases.length; i++) {
+            for (let i = 1; i < op.data.phases.length; i++) {
                 if (op.data.phases[i].evolveCost === null) continue;
 
                 const section = new Djs.SectionBuilder();

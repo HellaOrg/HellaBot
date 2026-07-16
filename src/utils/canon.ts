@@ -44,7 +44,7 @@ export class Deployable {
     }
     static clampSkillLevelIndex(deploy: T.Deployable, skillLevel: number): number {
         if (skillLevel < 0) return 0;
-        const maxLevel = deploy.skills.find(s => Skill.isValid(s)).excel.levels.length - 1;
+        const maxLevel = deploy.skills.find(s => Skill.isValid(s))?.excel.levels.length - 1;
         if (skillLevel > maxLevel) return maxLevel;
         return skillLevel;
     }
@@ -138,7 +138,7 @@ export class Operator extends Deployable {
     }
     static clampModuleLevelIndex(op: T.Operator, module: number): number {
         if (module < 0) return 0;
-        const maxIndex = op.modules.find(m => Module.isValid(m)).data.phases.length - 1;
+        const maxIndex = op.modules.find(m => Module.isValid(m))?.data.phases.length - 1;
         if (module > maxIndex) return maxIndex;
         return module;
     }
@@ -155,7 +155,7 @@ export class Operator extends Deployable {
         return gameConsts.rarity[op.data.rarity] > 1;
     }
     static hasDeployables(op: T.Operator): boolean {
-        return !!op.data.displayTokenDict && Object.values(op.data.displayTokenDict).every(s => s);
+        return !!op.data.displayTokenDict && Object.values(op.data.displayTokenDict).some(s => s);
     }
     static hasModules(op: T.Operator): boolean {
         return !!op.modules && !!op.modules.length;
