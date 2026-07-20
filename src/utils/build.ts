@@ -786,7 +786,7 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
         case typesDict.deploy.index: {
             if (!C.Operator.hasDeployables(op)) break;
 
-            extras = [extras?.[0] ?? 0];
+            extras = [extras?.[0] ?? 99];
 
             // ops may have multiple skill-attached deploys (ling, raidian) or a single skill-independent deploy (phantom, deepcolor)
             const skillAttachedDeploys = !op.skills.every(s => !C.Skill.hasDeployable(s));
@@ -798,23 +798,6 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
             for (const skillSection of opSkillSections) {
                 container.addSectionComponents(skillSection);
                 container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
-            }
-
-            const opSkillRow = new Djs.ActionRowBuilder<Djs.StringSelectMenuBuilder>();
-            container.addActionRowComponents(opSkillRow);
-            container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
-
-            const opSkillSelect = new Djs.StringSelectMenuBuilder()
-                .setCustomId(createCustomId('info', op.id, type, level, 'select'));
-            opSkillRow.addComponents(opSkillSelect);
-
-            for (let i = 0; i < op.skills.length; i++) {
-                if (skillAttachedDeploys && !C.Skill.hasDeployable(op.skills[i])) continue;
-                const deploySkillOption = new Djs.StringSelectMenuOptionBuilder()
-                    .setLabel(`Skill ${i + 1}`)
-                    .setValue(i.toString())
-                    .setDefault(i === skillIndex);
-                opSkillSelect.addOptions(deploySkillOption);
             }
 
             const titleSection = buildTitleSection(deploy, true);
@@ -830,6 +813,23 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
                 container.addSectionComponents(skillSection);
                 container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
             }
+
+            const opSkillRow = new Djs.ActionRowBuilder<Djs.StringSelectMenuBuilder>();
+            container.addActionRowComponents(opSkillRow);
+
+            const opSkillSelect = new Djs.StringSelectMenuBuilder()
+                .setCustomId(createCustomId('info', op.id, type, level, 'select'));
+            opSkillRow.addComponents(opSkillSelect);
+
+            for (let i = 0; i < op.skills.length; i++) {
+                if (skillAttachedDeploys && !C.Skill.hasDeployable(op.skills[i])) continue;
+                const deploySkillOption = new Djs.StringSelectMenuOptionBuilder()
+                    .setLabel(`Skill ${i + 1}`)
+                    .setValue(i.toString())
+                    .setDefault(i === skillIndex);
+                opSkillSelect.addOptions(deploySkillOption);
+            }
+
             break;
         }
         case typesDict.modules.index: {
@@ -1068,7 +1068,7 @@ export async function buildNewMessage(): Promise<Djs.BaseMessageOptions> {
         .sort().reverse()
         .join('\n');
     if (skinString && skinString.length > 0)
-        embed.addFields({ name: 'New Skins', value: skinString });
+        embed.addFields({ name: 'New Outfits', value: skinString });
 
     const moduleString = (await Promise.all(newInfo.module
         ?.filter(module => module.value.data)
@@ -2256,9 +2256,9 @@ function buildTitleSection(deploy: T.Deployable, extendedStats: boolean = false)
 
     const titleContent = [
         `## ${deploy.data.name} - ${'★'.repeat(gameConsts.rarity[deploy.data.rarity] + 1)}`,
-        `**${gameConsts.professions[deploy.data.profession]} - ${deploy.archetype}**`,
-        description
-    ]
+        `**${gameConsts.professions[deploy.data.profession]} - ${deploy.archetype}**`
+    ];
+    if (description !== '') titleContent.push(description);
     if (extendedStats) {
         if (C.Deployable.hasFactions(deploy)) {
             titleContent.push(

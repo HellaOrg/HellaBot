@@ -58,7 +58,7 @@ export class Deployable {
         return skin === 'default' || deploy.skins.some(s => s.battleSkin.skinOrPrefabId.toLowerCase() === skin || s.displaySkin.skinName?.toLowerCase() === skin);
     }
     static hasFactions(deploy: T.Deployable): boolean {
-        return !!deploy.factions && !!deploy.factions.length
+        return !!deploy.factions && deploy.factions.some(f => Object.values(f).every(v => !!v));
     }
     static hasPotentials(deploy: T.Deployable): boolean {
         return !!deploy.data.potentialRanks && !!deploy.data.potentialRanks.length;
