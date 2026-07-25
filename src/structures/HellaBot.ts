@@ -114,7 +114,7 @@ export default class HellaBot {
         this.nonregisteredEmojis[op.id] = true;
         try {
             await this.client.application.emojis.create({ attachment: `${paths.myAssetUrl}/operator/avatars/${op.id}.png`, name: op.id });
-            this.client.application.emojis.fetch().then(emojis => emojis.values().forEach(emoji => this.emojis.set(emoji.name, emoji)));
+            await this.client.application.emojis.fetch().then(emojis => emojis.values().forEach(emoji => this.emojis.set(emoji.name, emoji)));
         } catch (err) {
             console.error(err);
         }
@@ -163,6 +163,6 @@ export default class HellaBot {
         else {
             console.log('Skipped emoji registration');
         }
-        this.client.application.emojis.fetch().then(emojis => emojis.values().forEach(emoji => this.emojis.set(emoji.name, emoji)));
+        await this.client.application.emojis.fetch().then(emojis => emojis.values().forEach(emoji => this.emojis.set(emoji.name, emoji)));
     }
 }

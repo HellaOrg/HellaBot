@@ -8,7 +8,7 @@ import { Deployable } from '../utils/canon';
 export default class DeployCommand implements Command {
     data = new SlashCommandBuilder()
         .setName('deploy')
-        .setDescription('Show an deployable\'s information and attributes')
+        .setDescription('Show a deployable\'s information and attributes')
         .addStringOption(option =>
             option.setName('name')
                 .setDescription('Deployable name')
