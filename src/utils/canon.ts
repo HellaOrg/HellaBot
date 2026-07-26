@@ -155,7 +155,7 @@ export class Operator extends Deployable {
         return gameConsts.rarity[op.data.rarity] > 1;
     }
     static hasDeployables(op: T.Operator): boolean {
-        return !!op.data.displayTokenDict && Object.values(op.data.displayTokenDict).some(s => s);
+        return !!op.deploys && !!op.deploys.length;
     }
     static hasModules(op: T.Operator): boolean {
         return !!op.modules && !!op.modules.length;

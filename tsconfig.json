@@ -2,9 +2,11 @@
     "compilerOptions": {
         "allowJs": false,
         "target": "ESNext",
-        "module": "CommonJS",
         "noImplicitAny": false,
-        "strictNullChecks": false
+        "strictNullChecks": false,
+        "types": [
+            "node"
+        ]
     },
     "include": [
         "src/**/*.ts"

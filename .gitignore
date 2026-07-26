@@ -1,8 +1,4 @@
 node_modules
-.env
 config.json
-Arknight-Images
-ArknightsGameData
-ArknightsGameResource
-*.sh
 *.gif
+src/utils/canon.test.json
