@@ -29,6 +29,10 @@ jobs:
           [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
           nvm install node
           npm install
+
+      - name: Create config.json
+        run: |
+          echo "{}" > config.json
         
       - name: Test canon
         run: |

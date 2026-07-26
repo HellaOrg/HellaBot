@@ -13,10 +13,14 @@ async function main() {
 
     const diff = diffLines(reference, results);
 
-    if (diff.every(d => !d.added && !d.removed))
+    if (diff.every(d => !d.added && !d.removed)) {
         console.log("No canon diffs.")
-    else
+        return 0;
+    }
+    else {
         console.log(diff);
+        return 1;
+    }
 }
 
 async function testDeployables() {
