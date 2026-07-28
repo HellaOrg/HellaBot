@@ -1,10 +1,19 @@
-name: Canon test
+name: Verify canon
 
 on:
+  workflow_dispatch:
   push:
-    branches: [ "main" ]
+    branches:
+      - main
+    paths:
+      - src/utils/canon*
   pull_request:
-    branches: [ "main" ]
+    branches:
+      - main
+    paths:
+      - src/utils/canon*
+  schedule:
+    - cron: "0 0 * * *"
 
 concurrency:
   group: test-${{ github.workflow }}-${{ github.ref }}
@@ -12,7 +21,7 @@ concurrency:
 
 jobs:
   test:
-    name: Canon test
+    name: Verify canon
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
