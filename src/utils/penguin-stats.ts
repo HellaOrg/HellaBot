@@ -1,6 +1,6 @@
 import * as T from "hella-types";
+import { paths } from '../constants.json';
 import * as api from './api';
-const { paths } = require('../constants.json');
 
 export async function getItemAverageSanity(item: T.Item) {
     const itemMatrix = await (await fetch(`${paths.penguinStatsUrl}/result/matrix?server=US&itemFilter=${item.data.itemId}`)).json();

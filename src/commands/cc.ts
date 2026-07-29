@@ -1,10 +1,10 @@
 import { AutocompleteInteraction, ButtonInteraction, CacheType, ChatInputCommandInteraction, SlashCommandBuilder, StringSelectMenuInteraction } from 'discord.js';
+import { gameConsts } from '../constants.json';
 import Command from '../structures/Command';
 import * as api from '../utils/api';
 import { autocompleteCC } from '../utils/autocomplete';
 import { buildCCMessage, buildCCSelectMessage } from '../utils/build';
 import { CCStageLegacy } from '../utils/canon';
-const { gameConsts } = require('../constants');
 
 export default class CCCommand implements Command {
     data = new SlashCommandBuilder()

@@ -405,8 +405,7 @@
             "TIER_3": 2,
             "TIER_4": 3,
             "TIER_5": 4,
-            "TIER_6": 5,
-            "4": 4
+            "TIER_6": 5
         },
         "skillLevels": [
             "Level 1",

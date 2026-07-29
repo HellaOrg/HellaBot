@@ -1,5 +1,5 @@
 import * as T from "hella-types";
-const { paths } = require('../constants.json');
+import { paths } from '../constants.json';
 const { apiUrl } = require('../../config.json');
 
 type RouteParams = {
@@ -52,6 +52,7 @@ type ObjectMap = {
     'define': T.Definition;
     'deployable': T.Deployable;
     'enemy': T.Enemy;
+    'faction': T.Faction;
     'event': T.GameEvent;
     'gacha': T.GachaPool;
     'item': T.Item;

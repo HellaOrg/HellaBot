@@ -1,7 +1,7 @@
 import { ButtonInteraction, ChatInputCommandInteraction, EmbedBuilder, SlashCommandBuilder } from 'discord.js';
+import { paths } from '../constants.json';
 import Command from '../structures/Command';
 import { buildPingMessage } from '../utils/build';
-const { paths } = require('../constants.json');
 const { apiUrl } = require('../../config.json');
 
 export default class PingCommand implements Command {

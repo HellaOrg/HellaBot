@@ -2,9 +2,9 @@ import { ActivityType, ApplicationEmoji, Client, Collection, Events, GatewayInte
 import { readdirSync } from 'fs';
 import { Operator } from 'hella-types';
 import { join } from 'path';
+import { paths } from '../constants.json';
 import * as api from '../utils/api';
 import Command from './Command';
-const { paths } = require('../constants');
 
 export default class HellaBot {
     static commands = new Collection<string, Command>();

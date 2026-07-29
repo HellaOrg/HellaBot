@@ -1,5 +1,5 @@
 import * as T from 'hella-types';
-const { gameConsts } = require('../constants');
+import { gameConsts } from '../constants.json';
 
 export class CCSeason {
     static isValid(season: T.CCSeason): boolean {
@@ -89,6 +89,12 @@ export class Enemy {
     }
     static hasLevels(enemy: T.Enemy): boolean {
         return enemy.levels.Value.length > 1;
+    }
+}
+
+export class Faction {
+    static isValid(faction: T.Faction): boolean {
+        return !!faction;
     }
 }
 

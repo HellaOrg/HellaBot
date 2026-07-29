@@ -1,13 +1,13 @@
 import { AutocompleteInteraction, CacheType, ChatInputCommandInteraction, SlashCommandBuilder, StringSelectMenuInteraction } from 'discord.js';
 import { promises, unlinkSync } from 'fs';
 import { join } from 'path';
+import { paths } from '../constants.json';
 import Command from '../structures/Command';
 import * as api from '../utils/api';
 import { autocompleteDeployable, autocompleteEnemy, autocompleteOperator } from '../utils/autocomplete';
 import { buildSpineDeployMessage, buildSpineEnemyMessage, buildSpineOperatorMessage } from '../utils/build';
 import { Deployable, Enemy, Operator } from '../utils/canon';
 import * as spineHelper from '../utils/spine/spineHelper';
-const { paths } = require('../constants');
 
 const fileExists = async (path: string) => !!(await promises.stat(path).catch(e => false));
 const getSkelAnims = skelData => skelData.animations.filter(animation => animation.name !== 'Default').map(animation => animation.name);

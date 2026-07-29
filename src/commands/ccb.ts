@@ -1,10 +1,10 @@
 import { AutocompleteInteraction, ButtonInteraction, CacheType, ChatInputCommandInteraction, SlashCommandBuilder, StringSelectMenuInteraction } from 'discord.js';
+import { gameConsts } from '../constants.json';
 import Command from '../structures/Command';
 import * as api from '../utils/api';
 import { autocompleteCCB, autocompleteCCBLegacy } from '../utils/autocomplete';
 import { buildCCBLegacyMessage, buildCCBLegacySelectMessage, buildCCBMessage, buildCCBSelectMessage } from '../utils/build';
 import { CCSeason, CCStage, CCStageLegacy } from '../utils/canon';
-const { gameConsts } = require('../constants');
 
 export default class CCBCommand implements Command {
     data = new SlashCommandBuilder()

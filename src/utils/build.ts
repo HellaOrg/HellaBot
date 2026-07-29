@@ -1,12 +1,12 @@
 import * as Djs from 'discord.js';
 import type * as T from "hella-types";
 import { join } from 'path';
+import { embedColour, gameConsts, paths } from '../constants.json';
 import Command from '../structures/Command';
 import HellaBot from '../structures/HellaBot';
 import * as api from './api';
 import * as C from './canon';
 import * as pstats from './penguin-stats';
-const { embedColour, paths, gameConsts } = require('../constants');
 
 const blankChar = '\u200B';
 const cleanFilename = (text: string) => text.split(/%|[#\+]|&|\[|\]/).join(''); // Remove special characters that discord doesn't like (%, #, etc.)
@@ -19,6 +19,7 @@ function getItemEmoji(item: T.Item | string): string {
     return HellaBot.emojis.get(item.data.iconId) ? `<:${item.data.iconId}:${HellaBot.emojis.get(item.data.iconId).id}>` : '';
 }
 function getOpPrettyName(op: T.Operator, { rarity = true, emoji = true, name = true } = {}): string {
+    if (op.id === 'char_1037_amiya3') op.id = 'char_1037_amiya3_2';
     let string = '';
     if (rarity)
         string += `${gameConsts.rarity[op.data.rarity] + 1}★ `;
@@ -545,6 +546,54 @@ export async function buildEnemyMessage(enemy: T.Enemy, level: number): Promise<
     }
 
     return { embeds: [embed], components: [buttonRow] };
+}
+export async function buildFactionMessage(faction: T.Faction): Promise<Djs.BaseMessageOptions> {
+    const opArr = await api.searchV2('operator', {
+        filter: {
+            'or': [
+                { 'factions.nationPower.powerId': faction.powerId },
+                { 'factions.groupPower.powerId': faction.powerId },
+                { 'factions.teamPower.powerId': faction.powerId }
+            ]
+        },
+        include: ['id', 'data.name', 'data.rarity']
+    });
+
+    const embed = new Djs.EmbedBuilder()
+        .setColor(embedColour)
+        .setTitle(faction.powerName + ' Operators');
+
+    for (let i = 6; i > 0; i--) {
+        const opRarityArr = opArr.filter(op => op.data.rarity === `TIER_${i}`).sort((a, b) => a.data.name.localeCompare(b.data.name));
+        for (let j = 0; j < opRarityArr.length; j += 15) { // avoid discord 1024 char limit
+            const str = opRarityArr.slice(j, j + 15).map(op => getOpPrettyName(op, { rarity: false })).join(", ");
+            if (str != '')
+                embed.addFields({ name: j === 0 ? `${i}★ Operators` : '', value: str });
+        }
+    }
+
+    const imagePath = `${paths.aceshipImageUrl}/factions/logo_${faction.powerId}.png`;
+    if (await urlExists(imagePath))
+        embed.setThumbnail(imagePath);
+
+    return { embeds: [embed] };
+}
+export async function buildFactionListMessage(): Promise<Djs.BaseMessageOptions> {
+    const descriptionArr = [[], [], []];
+    const factionArr = await api.all('faction');
+    for (const faction of factionArr)
+        descriptionArr[faction.powerLevel].push(faction.powerName);
+
+    const embed = new Djs.EmbedBuilder()
+        .setColor(embedColour)
+        .setTitle('Operator Factions')
+        .addFields(
+            { name: 'Nations', value: descriptionArr[0].join('\n'), inline: true },
+            { name: 'Groups', value: descriptionArr[1].join('\n'), inline: true },
+            { name: 'Teams', value: descriptionArr[2].join('\n'), inline: true },
+        );
+
+    return { embeds: [embed] };
 }
 export async function buildEventListMessage(index: number): Promise<Djs.BaseMessageOptions> {
     const eventCount = 6;
