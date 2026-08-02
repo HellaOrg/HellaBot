@@ -8,6 +8,11 @@ import * as api from './api';
 import * as C from './canon';
 import * as pstats from './penguin-stats';
 
+const skipLoginEvents = [
+    'LOGIN_ONLY', 'CHECKIN_ONLY', 'FLOAT_PARADE', 'PRAY_ONLY', 'GRID_GACHA_V2',
+    'GRID_GACHA', 'BLESS_ONLY', 'CHECKIN_ACCESS', 'CHECKIN_VS', 'SWITCH_ONLY',
+    'UNIQUE_ONLY', 'COLLECTION', 'RECRUIT_ONLY', 'TEAM_QUEST'
+];
 const blankChar = '\u200B';
 const cleanFilename = (text: string) => text.split(/%|[#\+]|&|\[|\]/).join(''); // Remove special characters that discord doesn't like (%, #, etc.)
 const createCustomId = (...args: (string | number | boolean)[]): string => args.join('ඞ').toLowerCase();
@@ -261,15 +266,14 @@ export async function buildCCBSelectMessage(season: T.CCSeason): Promise<Djs.Bas
 
     return { content: `Please select a stage from CCB#${season.seasonId[17]} below:`, components: [componentRow] };
 }
-export async function buildCurrentMessage(): Promise<Djs.BaseMessageOptions> {
-    const skipLoginEvents = ['LOGIN_ONLY', 'CHECKIN_ONLY', 'FLOAT_PARADE', 'PRAY_ONLY', 'GRID_GACHA_V2', 'GRID_GACHA', 'BLESS_ONLY', 'CHECKIN_ACCESS'];
+export async function buildCurrentMessage() {
     const dailySupplyArr = [
-        ["Aerial Threat", "Cargo Escort", "Fearless Protection", "Solid Defense", "Tactical Drill", "Tough Siege", "Unstoppable Charge"],
-        ["Fierce Attack", "Resource Search", "Solid Defense", "Tactical Drill", "Tough Siege"],
-        ["Aerial Threat", "Cargo Escort", "Fearless Protection", "Fierce Attack", "Tactical Drill"], ["Aerial Threat", "Fearless Protection", "Resource Search", "Tactical Drill", "Unstoppable Charge"],
-        ["Cargo Escort", "Solid Defense", "Tactical Drill", "Tough Siege", "Unstoppable Charge"],
-        ["Aerial Threat", "Fierce Attack", "Resource Search", "Solid Defense", "Tactical Drill"],
-        ["Cargo Escort", "Fearless Protection", "Fierce Attack", "Resource Search", "Tactical Drill", "Tough Siege", "Unstoppable Charge"]
+        ["Cargo Escort", "Tactical Drill", "Aerial Threat", "Tough Siege", "Fearless Protection", "Solid Defense", "Unstoppable Charge"],
+        ["Tactical Drill", "Tough Siege", "Resource Search", "Fierce Attack", "Solid Defense"],
+        ["Cargo Escort", "Tactical Drill", "Aerial Threat", "Fearless Protection", "Fierce Attack"], ["Tactical Drill", "Aerial Threat", "Resource Search", "Fearless Protection", "Unstoppable Charge"],
+        ["Cargo Escort", "Tactical Drill", "Tough Siege", "Solid Defense", "Unstoppable Charge"],
+        ["Tactical Drill", "Aerial Threat", "Resource Search", "Fierce Attack", "Solid Defense"],
+        ["Cargo Escort", "Tactical Drill", "Tough Siege", "Resource Search", "Fearless Protection", "Fierce Attack", "Unstoppable Charge"]
     ];
     const supplyDrops = {
         "Aerial Threat": "Skill Summaries",
@@ -290,16 +294,15 @@ export async function buildCurrentMessage(): Promise<Djs.BaseMessageOptions> {
             'client.openTime': { '<=': currTime },
             'client.endTime': { '>=': currTime }
         },
-        sort: { 'client.endTime': 'asc' },
+        sort: { 'client.endTime': 'desc' },
         limit: 6
     }));
     const currEvents = (await api.searchV2('event', {
         filter: {
             'startTime': { '<=': currTime },
-            'endTime': { '>=': currTime },
-            'type': { 'nin': skipLoginEvents }
+            'endTime': { '>=': currTime }
         },
-        sort: { 'endTime': 'asc' },
+        sort: { 'endTime': 'desc' },
         limit: 6
     }));
     const opNames = await api.all('operator', { include: ['id', 'data.name'] });
@@ -308,26 +311,40 @@ export async function buildCurrentMessage(): Promise<Djs.BaseMessageOptions> {
     const localTime = new Date(now.getTime() + (now.getTimezoneOffset() + utc7Offset) * 60000);
     const dailySupply = dailySupplyArr[localTime.getUTCDay()];
 
-    const embed = new Djs.EmbedBuilder()
-        .setColor(embedColour)
-        .setTitle('Current Events and Banners')
-        .setDescription(`**Current Date/Time: <t:${currTime}:F>**`);
+    const resetDate = new Date(Date.UTC(localTime.getUTCFullYear(), localTime.getUTCMonth(), localTime.getUTCDate(), -utc7Offset / 60, 0, 0));
+    resetDate.setUTCDate(resetDate.getUTCDate() + 1);
+    const nextSupplyReset = Math.floor(resetDate.getTime() / 1000);
+
+    const container = new Djs.ContainerBuilder().setAccentColor(embedColour);
 
     if (currEvents.length > 0) {
+        container.addTextDisplayComponents(new Djs.TextDisplayBuilder().setContent('## Current Events'));
         for (const event of currEvents) {
-            embed.addFields(buildEventField(event));
+            container.addTextDisplayComponents(buildEventComponents(event));
         }
     }
     if (currBanners.length > 0) {
+        container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
+        container.addTextDisplayComponents(new Djs.TextDisplayBuilder().setContent('## Current Banners'));
         for (const banner of currBanners) {
-            embed.addFields(buildBannerField(opNames, banner));
+            container.addTextDisplayComponents(buildBannerComponents(opNames, banner));
         }
     }
 
     const supplyString = dailySupply.map(s => `**${s}** - ${supplyDrops[s]}`).join('\n'); // todo: add emojis once those are done
-    embed.addFields({ name: 'Today\'s Supply Stages', value: supplyString });
+    container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
+    container.addTextDisplayComponents(new Djs.TextDisplayBuilder().setContent([
+        '## Today\'s Supply Stages',
+        supplyString
+    ].join('\n')));
 
-    return { embeds: [embed] };
+    container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
+    container.addTextDisplayComponents(new Djs.TextDisplayBuilder().setContent([
+        `Current Date/Time: <t:${currTime}:F>`,
+        `Next Daily Reset: <t:${nextSupplyReset}:R>`
+    ].join('\n')));
+
+    return { components: [container], flags: Djs.MessageFlags.IsComponentsV2 | Djs.MessageFlags.Ephemeral }; // remove ephemeral once patched
 }
 export async function buildDefineMessage(definition: T.Definition): Promise<Djs.BaseMessageOptions> {
     const embed = new Djs.EmbedBuilder()
@@ -598,7 +615,6 @@ export async function buildFactionListMessage(): Promise<Djs.BaseMessageOptions>
 export async function buildEventListMessage(index: number): Promise<Djs.BaseMessageOptions> {
     const eventCount = 6;
 
-    const skipLoginEvents = ['LOGIN_ONLY', 'CHECKIN_ONLY', 'FLOAT_PARADE', 'PRAY_ONLY', 'GRID_GACHA_V2', 'GRID_GACHA', 'BLESS_ONLY', 'CHECKIN_ACCESS', 'CHECKIN_VS'];
     const eventArr = (await api.searchV2('event', {
         filter: {
             'type': { 'nin': skipLoginEvents }
@@ -636,6 +652,8 @@ export async function buildEventListMessage(index: number): Promise<Djs.BaseMess
         .setStyle(Djs.ButtonStyle.Primary);
     const componentRow = new Djs.ActionRowBuilder<Djs.ButtonBuilder>().addComponents(preverButton, prevButton, nextButton, nexterButton);
 
+    const maxPage = Math.ceil(eventArr.length / eventCount) - 1;
+
     if (index < 5) {
         preverButton.setCustomId(createCustomId('events', 0, 'prever'));
     }
@@ -645,14 +663,14 @@ export async function buildEventListMessage(index: number): Promise<Djs.BaseMess
         prevButton.setDisabled(true);
         prevButton.setStyle(Djs.ButtonStyle.Secondary);
     }
-    if (index + 1 > Math.floor(eventArr.length / eventCount)) {
+    if (index + 1 > maxPage) {
         nextButton.setDisabled(true);
         nextButton.setStyle(Djs.ButtonStyle.Secondary);
         nexterButton.setDisabled(true);
         nexterButton.setStyle(Djs.ButtonStyle.Secondary);
     }
-    if (index + 5 > Math.floor(eventArr.length / eventCount)) {
-        nexterButton.setCustomId(createCustomId('events', Math.floor(eventArr.length / eventCount), 'newer'));
+    if (index + 5 > maxPage) {
+        nexterButton.setCustomId(createCustomId('events', maxPage, 'newer'));
     }
 
     return { embeds: [embed], components: [componentRow] };
@@ -699,6 +717,8 @@ export async function buildGachaListMessage(index: number): Promise<Djs.BaseMess
         .setStyle(Djs.ButtonStyle.Primary);
     const componentRow = new Djs.ActionRowBuilder<Djs.ButtonBuilder>().addComponents(preverButton, prevButton, nextButton, nexterButton);
 
+    const maxPage = Math.ceil(timeArr.length / bannerCount) - 1;
+
     if (index < 5) {
         preverButton.setCustomId(createCustomId('gacha', 0, 'prever'));
     }
@@ -708,14 +728,14 @@ export async function buildGachaListMessage(index: number): Promise<Djs.BaseMess
         prevButton.setDisabled(true);
         prevButton.setStyle(Djs.ButtonStyle.Secondary);
     }
-    if (index + 1 > Math.floor(timeArr.length / bannerCount)) {
+    if (index + 1 > maxPage) {
         nextButton.setDisabled(true);
         nextButton.setStyle(Djs.ButtonStyle.Secondary);
         nexterButton.setDisabled(true);
         nexterButton.setStyle(Djs.ButtonStyle.Secondary);
     }
-    if (index + 5 > Math.floor(timeArr.length / bannerCount)) {
-        nexterButton.setCustomId(createCustomId('gacha', Math.floor(timeArr.length / bannerCount), 'newer'));
+    if (index + 5 > maxPage) {
+        nexterButton.setCustomId(createCustomId('gacha', maxPage, 'newer'));
     }
 
     return { embeds: [embed], components: [componentRow] };
@@ -1819,6 +1839,10 @@ function buildBannerField(opNames: T.Operator[], banner: T.GachaPool): Djs.Embed
     }
     return { name: bannerName, value: `${bannerDates}\n${bannerDesc}`, inline: false };
 }
+function buildBannerComponents(opNames: T.Operator[], banner: T.GachaPool): Djs.TextDisplayBuilder {
+    const { name, value } = buildBannerField(opNames, banner);
+    return new Djs.TextDisplayBuilder().setContent(`**${name}**\n${value}`);
+}
 function buildCostString(costs: T.LevelUpCost[], itemArr: T.Item[]): string {
     let description = '';
     for (const cost of costs) {
@@ -1836,6 +1860,10 @@ function buildEventField(event: T.GameEvent): Djs.EmbedField {
         eventString += ` - Starts <t:${event.startTime}:R>`;
     }
     return { name: event.name, value: eventString, inline: false };
+}
+function buildEventComponents(event: T.GameEvent): Djs.TextDisplayBuilder {
+    const { name, value } = buildEventField(event);
+    return new Djs.TextDisplayBuilder().setContent(`**${name}**\n${value}`);
 }
 function buildFactionString(deploy: T.Deployable): string {
     return deploy.factions.map(faction => Object.values(faction).filter(power => !!power).map(power => power.powerName).join(' - ')).join('\n');
