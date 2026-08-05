@@ -15,17 +15,17 @@ async function main() {
 
     if (diff.every(d => !d.added && !d.removed)) {
         console.log("No canon diffs.")
-        return 0;
+        process.exit(0);
     }
     else {
         console.log(diff);
-        return 1;
+        process.exit(1);
     }
 }
 
 async function testDeployables() {
     const deploys = await api.all('deployable');
-    deploys.sort();
+    deploys.sort((a, b) => a.id.localeCompare(b.id));
 
     const dict: { [key: string]: { [key: string]: boolean } } = {};
 
@@ -47,7 +47,7 @@ async function testDeployables() {
 
 async function testOperators() {
     const ops = await api.all('operator');
-    ops.sort();
+    ops.sort((a, b) => a.id.localeCompare(b.id));
 
     const dict: { [key: string]: { [key: string]: boolean } } = {};
 
@@ -74,7 +74,7 @@ async function testOperators() {
 
 async function testSkills() {
     const skills = await api.all('skill');
-    skills.sort();
+    skills.sort((a, b) => a.excel.skillId.localeCompare(b.excel.skillId));
 
     const dict: { [key: string]: { [key: string]: boolean } } = {};
 
