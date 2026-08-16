@@ -1,7 +1,5 @@
 # HellaBot
 
-[![canon](https://github.com/HellaOrg/HellaBot/actions/workflows/canon-test.yml/badge.svg)](https://github.com/HellaOrg/HellaBot/actions/workflows/canon-test.yml)
-
 An Arknights Discord bot that provides information on operators, enemies, stages, and more! 
 
 [Click here to invite the bot to a server (also available in DMs).](https://discord.com/application-directory/1277141603575922710)
