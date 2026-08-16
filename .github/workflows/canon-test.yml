@@ -12,8 +12,6 @@ on:
       - main
     paths:
       - src/utils/canon*
-  schedule:
-    - cron: "0 0 * * *"
 
 concurrency:
   group: test-${{ github.workflow }}-${{ github.ref }}
@@ -42,7 +40,7 @@ jobs:
       - name: Create config.json
         run: |
           echo "{}" > config.json
-        
+
       - name: Test canon
         run: |
           export NVM_DIR="$HOME/.nvm"
