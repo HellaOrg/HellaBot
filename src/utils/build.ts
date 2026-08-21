@@ -1832,6 +1832,17 @@ function buildBannerField(opNames: T.Operator[], banner: T.GachaPool): Djs.Embed
                 bannerDesc = `Select and lock-in three 6★ and three 5★ operators from a pool.\n6★ ${ops6.join(', ')}`;
                 break;
             }
+            case 11: {
+                const ops6 = [];
+                for (const charList of banner.details.detailInfo.availCharInfo.perAvailList) {
+                    for (const charId of charList.charIdList) {
+                        const char = opNames.find(char => char.id === charId);
+                        if (charList.rarityRank === 5) ops6.push(getOpPrettyName(char, { rarity: false }));
+                    }
+                }
+                bannerDesc = `**Available only for returning players**\nSelect and lock-in three 6★ and three 5★ operators from a pool.\n6★ ${ops6.join(', ')}`;
+                break;
+            }
             default: {
                 throw new Error(`Unknown banner type: ${banner.client.gachaPoolId}, ${banner.client.gachaRuleType}`);
             }
