@@ -12,13 +12,13 @@
     "dependencies": {
         "discord.js": "^14.27.0",
         "hella-types": "^0.3.2",
-        "puppeteer": "^24.43.1",
+        "puppeteer": "^25.12.0",
         "ts-node": "^10.9.2",
         "typescript": "^6.0.3",
         "w3c-xmlhttprequest": "^3.0.4"
     },
     "allowScripts": {
-        "puppeteer@24.43.1": true
+        "puppeteer@25.12.0": true
     },
     "devDependencies": {
         "diff": "^9.0.0"
