@@ -660,6 +660,16 @@
       "talents": true,
       "trait": false
     },
+    "token_10065_demetr_dmtpos": {
+      "factions": false,
+      "potentials": false,
+      "range": true,
+      "stats": true,
+      "skills": false,
+      "skins": true,
+      "talents": true,
+      "trait": false
+    },
     "trap_001_crate": {
       "factions": false,
       "potentials": false,
@@ -2417,7 +2427,7 @@
       "stats": true,
       "skills": true,
       "skins": true,
-      "talents": true,
+      "talents": false,
       "trait": false
     },
     "trap_1072_acarm072": {
@@ -2427,7 +2437,7 @@
       "stats": true,
       "skills": true,
       "skins": true,
-      "talents": false,
+      "talents": true,
       "trait": false
     },
     "trap_1073_acarm073": {
@@ -2860,10 +2870,140 @@
       "talents": false,
       "trait": false
     },
+    "trap_1113_acarm113": {
+      "factions": false,
+      "potentials": false,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": false,
+      "trait": false
+    },
+    "trap_1114_acarm114": {
+      "factions": false,
+      "potentials": false,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": false,
+      "trait": false
+    },
+    "trap_1115_acarm115": {
+      "factions": false,
+      "potentials": false,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": false,
+      "trait": false
+    },
+    "trap_1116_acarm116": {
+      "factions": false,
+      "potentials": false,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": false,
+      "trait": false
+    },
+    "trap_1117_acarm117": {
+      "factions": false,
+      "potentials": false,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": false,
+      "trait": false
+    },
+    "trap_1118_acarm118": {
+      "factions": false,
+      "potentials": false,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": false,
+      "trait": false
+    },
+    "trap_1119_acarm119": {
+      "factions": false,
+      "potentials": false,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": false,
+      "trait": false
+    },
     "trap_112_crsbow": {
       "factions": false,
       "potentials": false,
       "range": false,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": false,
+      "trait": false
+    },
+    "trap_1120_acarm120": {
+      "factions": false,
+      "potentials": false,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": false,
+      "trait": false
+    },
+    "trap_1121_acarm121": {
+      "factions": false,
+      "potentials": false,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": false,
+      "trait": false
+    },
+    "trap_1122_acarm122": {
+      "factions": false,
+      "potentials": false,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": false,
+      "trait": false
+    },
+    "trap_1123_acarm123": {
+      "factions": false,
+      "potentials": false,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": false,
+      "trait": false
+    },
+    "trap_1124_acarm124": {
+      "factions": false,
+      "potentials": false,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": false,
+      "trait": false
+    },
+    "trap_1125_acarm125": {
+      "factions": false,
+      "potentials": false,
+      "range": true,
       "stats": true,
       "skills": true,
       "skins": true,
@@ -4869,6 +5009,36 @@
       "skins": true,
       "talents": true,
       "trait": false
+    },
+    "trap_316_ubtower": {
+      "factions": false,
+      "potentials": false,
+      "range": false,
+      "stats": true,
+      "skills": false,
+      "skins": true,
+      "talents": true,
+      "trait": true
+    },
+    "trap_317_ubprison": {
+      "factions": false,
+      "potentials": false,
+      "range": true,
+      "stats": true,
+      "skills": false,
+      "skins": true,
+      "talents": true,
+      "trait": true
+    },
+    "trap_318_ubodst": {
+      "factions": false,
+      "potentials": false,
+      "range": true,
+      "stats": true,
+      "skills": false,
+      "skins": true,
+      "talents": true,
+      "trait": true
     },
     "trap_328_newlamp": {
       "factions": false,
@@ -7547,6 +7717,21 @@
       "talents": true,
       "trait": false
     },
+    "char_1051_headb2": {
+      "bases": true,
+      "costs": true,
+      "deploys": false,
+      "factions": true,
+      "modules": true,
+      "paradox": false,
+      "potentials": true,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": true,
+      "trait": true
+    },
     "char_106_franka": {
       "bases": true,
       "costs": true,
@@ -8078,7 +8263,7 @@
       "deploys": false,
       "factions": true,
       "modules": true,
-      "paradox": false,
+      "paradox": true,
       "potentials": true,
       "range": true,
       "stats": true,
@@ -9443,7 +9628,7 @@
       "deploys": false,
       "factions": true,
       "modules": true,
-      "paradox": false,
+      "paradox": true,
       "potentials": true,
       "range": true,
       "stats": true,
@@ -10517,6 +10702,21 @@
       "talents": true,
       "trait": false
     },
+    "char_4031_liesel": {
+      "bases": true,
+      "costs": true,
+      "deploys": false,
+      "factions": true,
+      "modules": true,
+      "paradox": false,
+      "potentials": true,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": true,
+      "trait": false
+    },
     "char_4032_provs": {
       "bases": true,
       "costs": true,
@@ -10539,6 +10739,21 @@
       "factions": true,
       "modules": true,
       "paradox": true,
+      "potentials": true,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": true,
+      "trait": false
+    },
+    "char_4037_demetr": {
+      "bases": true,
+      "costs": true,
+      "deploys": false,
+      "factions": true,
+      "modules": true,
+      "paradox": false,
       "potentials": true,
       "range": true,
       "stats": true,
@@ -11828,7 +12043,7 @@
       "deploys": false,
       "factions": true,
       "modules": true,
-      "paradox": false,
+      "paradox": true,
       "potentials": true,
       "range": true,
       "stats": true,
@@ -12143,7 +12358,7 @@
       "deploys": false,
       "factions": true,
       "modules": true,
-      "paradox": false,
+      "paradox": true,
       "potentials": true,
       "range": true,
       "stats": true,
@@ -12158,7 +12373,7 @@
       "deploys": false,
       "factions": true,
       "modules": true,
-      "paradox": false,
+      "paradox": true,
       "potentials": true,
       "range": true,
       "stats": true,
@@ -12278,6 +12493,36 @@
       "deploys": false,
       "factions": true,
       "modules": false,
+      "paradox": false,
+      "potentials": true,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": true,
+      "trait": true
+    },
+    "char_4223_botany": {
+      "bases": true,
+      "costs": true,
+      "deploys": false,
+      "factions": true,
+      "modules": true,
+      "paradox": false,
+      "potentials": true,
+      "range": true,
+      "stats": true,
+      "skills": true,
+      "skins": true,
+      "talents": true,
+      "trait": false
+    },
+    "char_4224_turdus": {
+      "bases": true,
+      "costs": true,
+      "deploys": false,
+      "factions": true,
+      "modules": true,
       "paradox": false,
       "potentials": true,
       "range": true,
@@ -13810,6 +14055,12 @@
     "skchr_bobb_2": {
       "deploys": false
     },
+    "skchr_botany_1": {
+      "deploys": false
+    },
+    "skchr_botany_2": {
+      "deploys": false
+    },
     "skchr_bpipe_2": {
       "deploys": false
     },
@@ -14067,6 +14318,15 @@
     },
     "skchr_delphn_2": {
       "deploys": false
+    },
+    "skchr_demetr_1": {
+      "deploys": false
+    },
+    "skchr_demetr_2": {
+      "deploys": false
+    },
+    "skchr_demetr_3": {
+      "deploys": true
     },
     "skchr_demkni_1": {
       "deploys": false
@@ -14434,6 +14694,15 @@
     "skchr_hbisc2_2": {
       "deploys": false
     },
+    "skchr_headb2_1": {
+      "deploys": false
+    },
+    "skchr_headb2_2": {
+      "deploys": false
+    },
+    "skchr_headb2_3": {
+      "deploys": false
+    },
     "skchr_headbr_2": {
       "deploys": false
     },
@@ -14726,6 +14995,12 @@
       "deploys": false
     },
     "skchr_leto_2": {
+      "deploys": false
+    },
+    "skchr_liesel_1": {
+      "deploys": false
+    },
+    "skchr_liesel_2": {
       "deploys": false
     },
     "skchr_lin_1": {
@@ -15736,6 +16011,12 @@
     "skchr_totter_2": {
       "deploys": false
     },
+    "skchr_turdus_1": {
+      "deploys": false
+    },
+    "skchr_turdus_2": {
+      "deploys": false
+    },
     "skchr_tuye_1": {
       "deploys": false
     },
@@ -16559,6 +16840,84 @@
       "deploys": false
     },
     "sktok_acarm109_2": {
+      "deploys": false
+    },
+    "sktok_acarm113_1": {
+      "deploys": false
+    },
+    "sktok_acarm113_2": {
+      "deploys": false
+    },
+    "sktok_acarm114_1": {
+      "deploys": false
+    },
+    "sktok_acarm114_2": {
+      "deploys": false
+    },
+    "sktok_acarm115_1": {
+      "deploys": false
+    },
+    "sktok_acarm115_2": {
+      "deploys": false
+    },
+    "sktok_acarm116_1": {
+      "deploys": false
+    },
+    "sktok_acarm116_2": {
+      "deploys": false
+    },
+    "sktok_acarm117_1": {
+      "deploys": false
+    },
+    "sktok_acarm117_2": {
+      "deploys": false
+    },
+    "sktok_acarm118_1": {
+      "deploys": false
+    },
+    "sktok_acarm118_2": {
+      "deploys": false
+    },
+    "sktok_acarm119_1": {
+      "deploys": false
+    },
+    "sktok_acarm119_2": {
+      "deploys": false
+    },
+    "sktok_acarm120_1": {
+      "deploys": false
+    },
+    "sktok_acarm120_2": {
+      "deploys": false
+    },
+    "sktok_acarm121_1": {
+      "deploys": false
+    },
+    "sktok_acarm121_2": {
+      "deploys": false
+    },
+    "sktok_acarm122_1": {
+      "deploys": false
+    },
+    "sktok_acarm122_2": {
+      "deploys": false
+    },
+    "sktok_acarm123_1": {
+      "deploys": false
+    },
+    "sktok_acarm123_2": {
+      "deploys": false
+    },
+    "sktok_acarm124_1": {
+      "deploys": false
+    },
+    "sktok_acarm124_2": {
+      "deploys": false
+    },
+    "sktok_acarm125_1": {
+      "deploys": false
+    },
+    "sktok_acarm125_2": {
       "deploys": false
     },
     "sktok_acblzd": {
