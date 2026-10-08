@@ -308,27 +308,38 @@ export async function buildCurrentMessage(): Promise<Djs.InteractionEditReplyOpt
     const opNames = await api.all('operator', { include: ['id', 'data.name'] });
 
     const utc7Offset = -7 * 60; // UTC-7 offset in minutes
-    const localTime = new Date(now.getTime() + (now.getTimezoneOffset() + utc7Offset) * 60000);
-    const dailySupply = dailySupplyArr[localTime.getUTCDay()];
 
-    const resetDate = new Date(Date.UTC(localTime.getUTCFullYear(), localTime.getUTCMonth(), localTime.getUTCDate(), -utc7Offset / 60, 0, 0));
-    resetDate.setUTCDate(resetDate.getUTCDate() + 1);
+    const gameDay = new Date(now.getTime() + utc7Offset * 60000);
+    const dailySupply = dailySupplyArr[gameDay.getUTCDay()];
+
+    const resetDate = new Date(now);
+    resetDate.setUTCHours(11, 0, 0, 0);
+    if (resetDate.getTime() <= now.getTime()) {
+        resetDate.setUTCDate(resetDate.getUTCDate() + 1);
+    }
     const nextSupplyReset = Math.floor(resetDate.getTime() / 1000);
 
     const container = new Djs.ContainerBuilder().setAccentColor(embedColour);
 
+    container.addTextDisplayComponents(new Djs.TextDisplayBuilder().setContent('## Current Events'));
     if (currEvents.length > 0) {
-        container.addTextDisplayComponents(new Djs.TextDisplayBuilder().setContent('## Current Events'));
         for (const event of currEvents) {
             container.addTextDisplayComponents(buildEventComponents(event));
         }
     }
+    else {
+        container.addTextDisplayComponents(new Djs.TextDisplayBuilder().setContent('There\'s nothing here...'));
+    }
+    container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
+
+    container.addTextDisplayComponents(new Djs.TextDisplayBuilder().setContent('## Current Banners'));
     if (currBanners.length > 0) {
-        container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
-        container.addTextDisplayComponents(new Djs.TextDisplayBuilder().setContent('## Current Banners'));
         for (const banner of currBanners) {
             container.addTextDisplayComponents(buildBannerComponents(opNames, banner));
         }
+    }
+    else {
+        container.addTextDisplayComponents(new Djs.TextDisplayBuilder().setContent('There\'s nothing here...'));
     }
 
     const supplyString = dailySupply.map(s => `**${s}** - ${supplyDrops[s]}`).join('\n'); // todo: add emojis once those are done
