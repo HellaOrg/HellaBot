@@ -15,12 +15,14 @@ export default class HellaBot {
     static clientId: string;
     static disabled: { [key: string]: boolean };
     static client: Client;
+    static debug: boolean;
 
-    public static async create(token: string, clientId: string, disabled: { [key: string]: boolean }, skipRegister: boolean = false) {
+    public static async create(token: string, clientId: string, disabled: { [key: string]: boolean }, skipRegister: boolean = false, debug: boolean = false) {
         this.token = token;
         this.clientId = clientId;
         this.disabled = disabled;
         this.client = new Client({ intents: [GatewayIntentBits.Guilds] });
+        this.debug = debug;
         this.client.on(Events.InteractionCreate, async interaction => {
             if (interaction.isChatInputCommand()) {
                 const command = this.commands.get(interaction.commandName);

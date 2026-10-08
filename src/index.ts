@@ -3,9 +3,10 @@ const { clientId, token, disabled } = require('../config.json');
 
 const cmdArgs = process.argv.slice(2);
 const noReg = cmdArgs.includes('noreg');
+const debug = cmdArgs.includes('debug');
 
 async function main() {
-    await HellaBot.create(token, clientId, disabled, noReg);
+    await HellaBot.create(token, clientId, disabled, noReg, debug);
 }
 
 main();

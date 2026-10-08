@@ -1,5 +1,6 @@
 import * as T from "hella-types";
 import { paths } from '../constants.json';
+import HellaBot from '../structures/HellaBot';
 const { apiUrl } = require('../../config.json');
 
 type RouteParams = {
@@ -131,6 +132,8 @@ class PathBuilder {
         return this;
     }
     public toString() {
+        if (HellaBot.debug)
+            console.log(this.path);
         return this.path;
     }
 }

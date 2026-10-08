@@ -4,7 +4,6 @@
     "description": "",
     "scripts": {
         "start": "ts-node src/index.ts",
-        "noreg": "ts-node src/index.ts noreg",
         "update-types": "npm install hella-types@latest",
         "canon-test": "ts-node src/utils/canon.test.ts"
     },
