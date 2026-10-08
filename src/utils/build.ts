@@ -613,28 +613,67 @@ export async function buildFactionListMessage(): Promise<Djs.InteractionEditRepl
     return { embeds: [embed] };
 }
 export async function buildEventListMessage(index: number): Promise<Djs.InteractionEditReplyOptions> {
-    const eventCount = 6;
+    const pastEventLimit = 6;
 
-    const eventArr = (await api.searchV2('event', {
-        filter: {
-            'type': {
-                'nin': skipLoginEvents,
-                'regex': '^(?!.*CHECKIN).*$',
+    const now = new Date();
+    const currTime = Math.floor(now.getTime() / 1000);
+
+    const [futureEvents, currEvents, pastEvents] = await Promise.all([
+        api.searchV2('event', {
+            filter: {
+                'startTime': { '>': currTime },
+            },
+            sort: {
+                'startTime': 'desc',
             }
-        },
-        sort: {
-            'startTime': 'desc',
-            'endTime': 'desc'
+        }),
+        api.searchV2('event', {
+            filter: {
+                'startTime': { '<=': currTime },
+                'endTime': { '>=': currTime }
+            },
+            sort: {
+                'endTime': 'desc'
+            }
+        }),
+        api.searchV2('event', {
+            filter: {
+                'endTime': { '<': currTime },
+            },
+            sort: {
+                'startTime': 'desc',
+            }
+        }),
+    ]);
+
+    const container = new Djs.ContainerBuilder().setAccentColor(embedColour);
+
+    container.addTextDisplayComponents(new Djs.TextDisplayBuilder().setContent('## Upcoming Events'));
+    if (futureEvents.length > 0) {
+        for (const event of futureEvents) {
+            container.addTextDisplayComponents(buildEventComponents(event));
         }
-    }));
+    }
+    else {
+        container.addTextDisplayComponents(new Djs.TextDisplayBuilder().setContent('There\'s nothing here...'));
+    }
+    container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
 
-    const embed = new Djs.EmbedBuilder()
-        .setColor(embedColour)
-        .setTitle('Game Events')
-        .setDescription(`**Page ${index + 1} of ${Math.ceil(eventArr.length / eventCount)}**`);
+    container.addTextDisplayComponents(new Djs.TextDisplayBuilder().setContent('## Current Events'));
+    if (currEvents.length > 0) {
+        for (const event of currEvents) {
+            container.addTextDisplayComponents(buildEventComponents(event));
+        }
+    }
+    else {
+        container.addTextDisplayComponents(new Djs.TextDisplayBuilder().setContent('There\'s nothing here...'));
+    }
+    container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
 
-    for (let i = index * eventCount; i < index * eventCount + eventCount && i < eventArr.length; i++) {
-        embed.addFields(buildEventField(eventArr[i]));
+    container.addTextDisplayComponents(new Djs.TextDisplayBuilder().setContent('## Past Events'));
+    container.addTextDisplayComponents(new Djs.TextDisplayBuilder().setContent(`**Page ${index + 1} of ${Math.ceil(pastEvents.length / pastEventLimit)}**`));
+    for (let i = index * pastEventLimit; i < index * pastEventLimit + pastEventLimit && i < pastEvents.length; i++) {
+        container.addTextDisplayComponents(buildEventComponents(pastEvents[i]));
     }
 
     const preverButton = new Djs.ButtonBuilder()
@@ -654,8 +693,9 @@ export async function buildEventListMessage(index: number): Promise<Djs.Interact
         .setLabel('>>')
         .setStyle(Djs.ButtonStyle.Primary);
     const componentRow = new Djs.ActionRowBuilder<Djs.ButtonBuilder>().addComponents(preverButton, prevButton, nextButton, nexterButton);
+    container.addActionRowComponents(componentRow);
 
-    const maxPage = Math.ceil(eventArr.length / eventCount) - 1;
+    const maxPage = Math.ceil(pastEvents.length / pastEventLimit) - 1;
 
     if (index < 5) {
         preverButton.setCustomId(createCustomId('events', 0, 'prever'));
@@ -676,7 +716,7 @@ export async function buildEventListMessage(index: number): Promise<Djs.Interact
         nexterButton.setCustomId(createCustomId('events', maxPage, 'newer'));
     }
 
-    return { embeds: [embed], components: [componentRow] };
+    return { components: [container], flags: Djs.MessageFlags.IsComponentsV2 };
 }
 export async function buildGachaListMessage(index: number): Promise<Djs.InteractionEditReplyOptions> {
     const bannerCount = 6;
@@ -1877,7 +1917,7 @@ function buildEventField(event: T.GameEvent): Djs.EmbedField {
 }
 function buildEventComponents(event: T.GameEvent): Djs.TextDisplayBuilder {
     const { name, value } = buildEventField(event);
-    return new Djs.TextDisplayBuilder().setContent(`**${name}**\n${value}`);
+    return new Djs.TextDisplayBuilder().setContent(`**${name.replaceAll('\n', ' ')}**\n${value}`);
 }
 function buildFactionString(deploy: T.Deployable): string {
     return deploy.factions.map(faction => Object.values(faction).filter(power => !!power).map(power => power.powerName).join(' - ')).join('\n');
