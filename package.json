@@ -11,7 +11,7 @@
     "author": "",
     "dependencies": {
         "discord.js": "^14.27.0",
-        "hella-types": "^0.3.2",
+        "hella-types": "^0.3.3",
         "puppeteer": "^25.12.0",
         "ts-node": "^10.9.2",
         "typescript": "^6.0.3",
