@@ -617,7 +617,10 @@ export async function buildEventListMessage(index: number): Promise<Djs.Interact
 
     const eventArr = (await api.searchV2('event', {
         filter: {
-            'type': { 'nin': skipLoginEvents }
+            'type': {
+                'nin': skipLoginEvents,
+                'regex': '^(?!.*CHECKIN).*$',
+            }
         },
         sort: {
             'startTime': 'desc',
