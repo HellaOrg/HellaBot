@@ -59,7 +59,7 @@ function insertBlackboard(text: string, blackboard: T.Blackboard[]) {
     return textArr.join('').replaceAll('-`', '`-').replaceAll('+`', '`+');
 }
 
-export async function buildCCMessage(stage: T.CCStageLegacy, page: number): Promise<Djs.BaseMessageOptions> {
+export async function buildCCMessage(stage: T.CCStageLegacy, page: number): Promise<Djs.InteractionEditReplyOptions> {
     const stageInfo = stage.const;
     const stageData = stage.levels;
 
@@ -112,7 +112,7 @@ export async function buildCCMessage(stage: T.CCStageLegacy, page: number): Prom
         return { content: '', embeds: [embed], components: [buttonRow] };
     }
 }
-export async function buildCCBLegacyMessage(stage: T.CCStageLegacy, page: number): Promise<Djs.BaseMessageOptions> {
+export async function buildCCBLegacyMessage(stage: T.CCStageLegacy, page: number): Promise<Djs.InteractionEditReplyOptions> {
     const stageInfo = stage.const;
     const stageData = stage.levels;
 
@@ -165,7 +165,7 @@ export async function buildCCBLegacyMessage(stage: T.CCStageLegacy, page: number
         return { content: '', embeds: [embed], components: [buttonRow] };
     }
 }
-export async function buildCCBMessage(stage: T.CCStage, page: number): Promise<Djs.BaseMessageOptions> {
+export async function buildCCBMessage(stage: T.CCStage, page: number): Promise<Djs.InteractionEditReplyOptions> {
     const stageInfo = stage.excel;
     const stageData = stage.levels;
 
@@ -218,7 +218,7 @@ export async function buildCCBMessage(stage: T.CCStage, page: number): Promise<D
         return { content: '', embeds: [embed], components: [buttonRow] };
     }
 }
-export async function buildCCSelectMessage(season: string): Promise<Djs.BaseMessageOptions> {
+export async function buildCCSelectMessage(season: string): Promise<Djs.InteractionEditReplyOptions> {
     const ccSelector = new Djs.StringSelectMenuBuilder()
         .setCustomId(createCustomId('cc', 'select'))
         .setPlaceholder('Select a stage!');
@@ -234,7 +234,7 @@ export async function buildCCSelectMessage(season: string): Promise<Djs.BaseMess
 
     return { content: `Please select a stage from CC#${season} below:`, components: [componentRow] };
 }
-export async function buildCCBLegacySelectMessage(season: string): Promise<Djs.BaseMessageOptions> {
+export async function buildCCBLegacySelectMessage(season: string): Promise<Djs.InteractionEditReplyOptions> {
     const ccbSelector = new Djs.StringSelectMenuBuilder()
         .setCustomId(createCustomId('ccb', 'select'))
         .setPlaceholder('Select a stage!');
@@ -250,7 +250,7 @@ export async function buildCCBLegacySelectMessage(season: string): Promise<Djs.B
 
     return { content: `Please select a stage from CCB#${season} below:`, components: [componentRow] };
 }
-export async function buildCCBSelectMessage(season: T.CCSeason): Promise<Djs.BaseMessageOptions> {
+export async function buildCCBSelectMessage(season: T.CCSeason): Promise<Djs.InteractionEditReplyOptions> {
     const ccbSelector = new Djs.StringSelectMenuBuilder()
         .setCustomId(createCustomId('ccb', 'select'))
         .setPlaceholder('Select a stage!');
@@ -266,7 +266,7 @@ export async function buildCCBSelectMessage(season: T.CCSeason): Promise<Djs.Bas
 
     return { content: `Please select a stage from CCB#${season.seasonId[17]} below:`, components: [componentRow] };
 }
-export async function buildCurrentMessage() {
+export async function buildCurrentMessage(): Promise<Djs.InteractionEditReplyOptions> {
     const dailySupplyArr = [
         ["Cargo Escort", "Tactical Drill", "Aerial Threat", "Tough Siege", "Fearless Protection", "Solid Defense", "Unstoppable Charge"],
         ["Tactical Drill", "Tough Siege", "Resource Search", "Fierce Attack", "Solid Defense"],
@@ -344,9 +344,9 @@ export async function buildCurrentMessage() {
         `Next Daily Reset: <t:${nextSupplyReset}:R>`
     ].join('\n')));
 
-    return { components: [container], flags: Djs.MessageFlags.IsComponentsV2 | Djs.MessageFlags.Ephemeral }; // remove ephemeral once patched
+    return { components: [container], flags: Djs.MessageFlags.IsComponentsV2 };
 }
-export async function buildDefineMessage(definition: T.Definition): Promise<Djs.BaseMessageOptions> {
+export async function buildDefineMessage(definition: T.Definition): Promise<Djs.InteractionEditReplyOptions> {
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
         .setTitle(definition.termName)
@@ -354,7 +354,7 @@ export async function buildDefineMessage(definition: T.Definition): Promise<Djs.
 
     return { embeds: [embed] };
 }
-export async function buildDefineListMessage(): Promise<Djs.BaseMessageOptions> {
+export async function buildDefineListMessage(): Promise<Djs.InteractionEditReplyOptions> {
     let statusDescription = '', effectDescription = '', groupDescription = '';
     const dataArr = await api.all('define');
     for (const term of dataArr) {
@@ -391,7 +391,7 @@ export async function buildDefineListMessage(): Promise<Djs.BaseMessageOptions> 
 
     return { embeds: [embed] };
 }
-export async function buildDeployMessage(deploy: T.Deployable, type: number, level: number) {
+export async function buildDeployMessage(deploy: T.Deployable, type: number, level: number): Promise<Djs.InteractionEditReplyOptions> {
     const typesDict = {
         stats: {
             label: 'Stats', index: 0, value: '0',
@@ -470,9 +470,9 @@ export async function buildDeployMessage(deploy: T.Deployable, type: number, lev
         typeSelect.addOptions(typeOption);
     }
 
-    return { components: [container], flags: Djs.MessageFlags.IsComponentsV2 | Djs.MessageFlags.Ephemeral }; // remove ephemeral once patched
+    return { components: [container], flags: Djs.MessageFlags.IsComponentsV2 };
 }
-export async function buildEnemyMessage(enemy: T.Enemy, level: number): Promise<Djs.BaseMessageOptions> {
+export async function buildEnemyMessage(enemy: T.Enemy, level: number): Promise<Djs.InteractionEditReplyOptions> {
     const enemyInfo = enemy.excel;
     const enemyData = enemy.levels.Value[level].enemyData;
     const baseData = enemy.levels.Value[0].enemyData;
@@ -564,7 +564,7 @@ export async function buildEnemyMessage(enemy: T.Enemy, level: number): Promise<
 
     return { embeds: [embed], components: [buttonRow] };
 }
-export async function buildFactionMessage(faction: T.Faction): Promise<Djs.BaseMessageOptions> {
+export async function buildFactionMessage(faction: T.Faction): Promise<Djs.InteractionEditReplyOptions> {
     const opArr = await api.searchV2('operator', {
         filter: {
             'or': [
@@ -595,7 +595,7 @@ export async function buildFactionMessage(faction: T.Faction): Promise<Djs.BaseM
 
     return { embeds: [embed] };
 }
-export async function buildFactionListMessage(): Promise<Djs.BaseMessageOptions> {
+export async function buildFactionListMessage(): Promise<Djs.InteractionEditReplyOptions> {
     const descriptionArr = [[], [], []];
     const factionArr = await api.all('faction');
     for (const faction of factionArr)
@@ -612,7 +612,7 @@ export async function buildFactionListMessage(): Promise<Djs.BaseMessageOptions>
 
     return { embeds: [embed] };
 }
-export async function buildEventListMessage(index: number): Promise<Djs.BaseMessageOptions> {
+export async function buildEventListMessage(index: number): Promise<Djs.InteractionEditReplyOptions> {
     const eventCount = 6;
 
     const eventArr = (await api.searchV2('event', {
@@ -675,7 +675,7 @@ export async function buildEventListMessage(index: number): Promise<Djs.BaseMess
 
     return { embeds: [embed], components: [componentRow] };
 }
-export async function buildGachaListMessage(index: number): Promise<Djs.BaseMessageOptions> {
+export async function buildGachaListMessage(index: number): Promise<Djs.InteractionEditReplyOptions> {
     const bannerCount = 6;
     const timeArr = (await api.all('gacha', {
         include: ['client.gachaPoolId', 'client.openTime'],
@@ -740,7 +740,7 @@ export async function buildGachaListMessage(index: number): Promise<Djs.BaseMess
 
     return { embeds: [embed], components: [componentRow] };
 }
-export async function buildHelpMessage(command: Command): Promise<Djs.BaseMessageOptions> {
+export async function buildHelpMessage(command: Command): Promise<Djs.InteractionEditReplyOptions> {
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
         .setTitle(command.name)
@@ -749,7 +749,7 @@ export async function buildHelpMessage(command: Command): Promise<Djs.BaseMessag
 
     return { embeds: [embed] };
 }
-export async function buildHelpListMessage(): Promise<Djs.BaseMessageOptions> {
+export async function buildHelpListMessage(): Promise<Djs.InteractionEditReplyOptions> {
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
         .setTitle('Help Menu');
@@ -758,7 +758,7 @@ export async function buildHelpListMessage(): Promise<Djs.BaseMessageOptions> {
 
     return { embeds: [embed] };
 }
-export async function buildInfoMessage(op: T.Operator, type: number = 0, level: number = 0, extras: number[] = []) {
+export async function buildInfoMessage(op: T.Operator, type: number = 0, level: number = 0, extras: number[] = []): Promise<Djs.InteractionEditReplyOptions> {
     const typesDict = {
         stats: {
             label: 'Stats', index: 0, value: '0',
@@ -1066,9 +1066,9 @@ export async function buildInfoMessage(op: T.Operator, type: number = 0, level: 
         typeSelect.addOptions(typeOption);
     }
 
-    return { components: [container], flags: Djs.MessageFlags.IsComponentsV2 | Djs.MessageFlags.Ephemeral }; // remove ephemeral once patched
+    return { components: [container], flags: Djs.MessageFlags.IsComponentsV2 };
 }
-export async function buildItemMessage(item: T.Item): Promise<Djs.BaseMessageOptions> {
+export async function buildItemMessage(item: T.Item): Promise<Djs.InteractionEditReplyOptions> {
     const dropStageCount = 6;
 
     const description = item.data.description !== null ? `${item.data.usage} \n\n${item.data.description}` : item.data.usage;
@@ -1095,7 +1095,7 @@ export async function buildItemMessage(item: T.Item): Promise<Djs.BaseMessageOpt
 
     return { embeds: [embed] };
 }
-export async function buildNewMessage(): Promise<Djs.BaseMessageOptions> {
+export async function buildNewMessage(): Promise<Djs.InteractionEditReplyOptions> {
     const opName = (op: T.Operator) => getOpPrettyName(op);
 
     const opCache = {};
@@ -1163,7 +1163,7 @@ export async function buildNewMessage(): Promise<Djs.BaseMessageOptions> {
 
     return { embeds: [embed] };
 }
-export async function buildPingMessage(): Promise<Djs.BaseMessageOptions> {
+export async function buildPingMessage(): Promise<Djs.InteractionEditReplyOptions> {
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
         .setTitle('Ping')
@@ -1180,7 +1180,7 @@ export async function buildPingMessage(): Promise<Djs.BaseMessageOptions> {
 
     return { embeds: [embed], components: [new Djs.ActionRowBuilder<Djs.ButtonBuilder>().addComponents(button)] };
 }
-export async function buildRecruitMessage(value: number, tags: string[], select: boolean, snowflakes: string[]): Promise<Djs.BaseMessageOptions[]> {
+export async function buildRecruitMessage(value: number, tags: string[], select: boolean, snowflakes: string[]): Promise<Djs.InteractionEditReplyOptions[]> {
     tags.forEach(tag => {
         select ? value *= gameConsts.tagValues[tag]
             : value /= gameConsts.tagValues[tag];
@@ -1335,7 +1335,7 @@ export async function buildRecruitMessage(value: number, tags: string[], select:
 
     return [{ content: '', embeds: [qualEmbed], components: qualComponents }, { content: '', embeds: [tagEmbed], components: tagComponents }, { content: '', embeds: [recruitEmbed], components: utilComponents }];
 }
-export async function buildRogueRelicMessage(relic: T.RogueRelic): Promise<Djs.BaseMessageOptions> {
+export async function buildRogueRelicMessage(relic: T.RogueRelic): Promise<Djs.InteractionEditReplyOptions> {
     const description = `${relic.description !== null ? `${relic.usage}\n\n${relic.description}` : relic.usage}`;
 
     const embed = new Djs.EmbedBuilder()
@@ -1349,7 +1349,7 @@ export async function buildRogueRelicMessage(relic: T.RogueRelic): Promise<Djs.B
 
     return { embeds: [embed] };
 }
-export async function buildRogueRelicListMessage(theme: number, index: number): Promise<Djs.BaseMessageOptions> {
+export async function buildRogueRelicListMessage(theme: number, index: number): Promise<Djs.InteractionEditReplyOptions> {
     const rogueTheme = await api.single('rogue', { query: theme.toString(), include: ['name', 'relicDict'] });
     const descriptionLengthLimit = 24;
     const columnCount = 2;
@@ -1447,7 +1447,7 @@ export async function buildRogueRelicListMessage(theme: number, index: number): 
 
     return { embeds: [embed], components: [componentRow] };
 }
-export async function buildRogueStageMessage(theme: number, stage: T.RogueStage, page: number): Promise<Djs.BaseMessageOptions> {
+export async function buildRogueStageMessage(theme: number, stage: T.RogueStage, page: number): Promise<Djs.InteractionEditReplyOptions> {
     const stageInfo = stage.excel;
     const stageData = stage.levels;
 
@@ -1497,7 +1497,7 @@ export async function buildRogueStageMessage(theme: number, stage: T.RogueStage,
         return { embeds: [embed], components: [buttonRow] };
     }
 }
-export async function buildRogueVariationMessage(variation: T.RogueVariation): Promise<Djs.BaseMessageOptions> {
+export async function buildRogueVariationMessage(variation: T.RogueVariation): Promise<Djs.InteractionEditReplyOptions> {
     const description = `${variation.functionDesc}\n\n${variation.desc}`;
 
     const embed = new Djs.EmbedBuilder()
@@ -1507,7 +1507,7 @@ export async function buildRogueVariationMessage(variation: T.RogueVariation): P
 
     return { embeds: [embed] };
 }
-export async function buildRogueVariationListMessage(theme: number): Promise<Djs.BaseMessageOptions> {
+export async function buildRogueVariationListMessage(theme: number): Promise<Djs.InteractionEditReplyOptions> {
     const rogueTheme = await api.single('rogue', { query: theme.toString(), include: ['name', 'variationDict'] });
 
     let description = '';
@@ -1522,7 +1522,7 @@ export async function buildRogueVariationListMessage(theme: number): Promise<Djs
 
     return { embeds: [embed] };
 }
-export async function buildSandboxItemMessage(theme: number, item: T.SandboxItem): Promise<Djs.BaseMessageOptions> {
+export async function buildSandboxItemMessage(theme: number, item: T.SandboxItem): Promise<Djs.InteractionEditReplyOptions> {
     const items = (await api.single('sandbox', { query: theme.toString(), include: ['itemDict'] })).itemDict;
 
     const embed = new Djs.EmbedBuilder()
@@ -1565,7 +1565,7 @@ export async function buildSandboxItemMessage(theme: number, item: T.SandboxItem
 
     return { embeds: [embed] };
 }
-export async function buildSandboxStageMessage(theme: number, stage: T.SandboxStage, page: number): Promise<Djs.BaseMessageOptions> {
+export async function buildSandboxStageMessage(theme: number, stage: T.SandboxStage, page: number): Promise<Djs.InteractionEditReplyOptions> {
     const stageInfo = stage.excel;
     const stageData = stage.levels;
 
@@ -1616,7 +1616,7 @@ export async function buildSandboxStageMessage(theme: number, stage: T.SandboxSt
         return { content: '', embeds: [embed], components: [buttonRow] };
     }
 }
-export async function buildSandboxWeatherMessage(theme: number, weather: T.SandboxWeather): Promise<Djs.BaseMessageOptions> {
+export async function buildSandboxWeatherMessage(theme: number, weather: T.SandboxWeather): Promise<Djs.InteractionEditReplyOptions> {
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
         .setTitle(weather.name)
@@ -1628,7 +1628,7 @@ export async function buildSandboxWeatherMessage(theme: number, weather: T.Sandb
 
     return { embeds: [embed] };
 }
-export async function buildSpineEnemyMessage(gifFile: string, enemy: T.Enemy, animArr: string[], anim: string): Promise<Djs.BaseMessageOptions> {
+export async function buildSpineEnemyMessage(gifFile: string, enemy: T.Enemy, animArr: string[], anim: string): Promise<Djs.InteractionEditReplyOptions> {
     const id = enemy.excel.enemyId;
 
     const authorField = buildEnemyAuthorField(enemy);
@@ -1657,7 +1657,7 @@ export async function buildSpineEnemyMessage(gifFile: string, enemy: T.Enemy, an
 
     return { content: '', embeds: [embed], files: [gif], components: [componentRow] };
 }
-export async function buildSpineOperatorMessage(gifFile: string, op: T.Operator, skin: string, set: string, animArr: string[], anim: string): Promise<Djs.BaseMessageOptions> {
+export async function buildSpineOperatorMessage(gifFile: string, op: T.Operator, skin: string, set: string, animArr: string[], anim: string): Promise<Djs.InteractionEditReplyOptions> {
     const id = op.id;
 
     const authorField = buildDeployableAuthorField(op);
@@ -1686,7 +1686,7 @@ export async function buildSpineOperatorMessage(gifFile: string, op: T.Operator,
 
     return { content: '', embeds: [embed], files: [gif], components: [componentRow] };
 }
-export async function buildSpineDeployMessage(gifFile: string, deploy: T.Deployable, skin: string, set: string, animArr: string[], anim: string): Promise<Djs.BaseMessageOptions> {
+export async function buildSpineDeployMessage(gifFile: string, deploy: T.Deployable, skin: string, set: string, animArr: string[], anim: string): Promise<Djs.InteractionEditReplyOptions> {
     const id = deploy.id;
 
     const authorField = buildDeployableAuthorField(deploy);
@@ -1715,7 +1715,7 @@ export async function buildSpineDeployMessage(gifFile: string, deploy: T.Deploya
 
     return { content: '', embeds: [embed], files: [gif], components: [componentRow] };
 }
-export async function buildStageMessage(stage: T.Stage, level: number) {
+export async function buildStageMessage(stage: T.Stage, level: number): Promise<Djs.InteractionEditReplyOptions> {
     const container = new Djs.ContainerBuilder().setAccentColor(embedColour);
 
     level = C.Stage.clampIndex(level);
@@ -1750,7 +1750,7 @@ export async function buildStageMessage(stage: T.Stage, level: number) {
         }
     }
 
-    return { components: [container], flags: Djs.MessageFlags.IsComponentsV2 | Djs.MessageFlags.Ephemeral }; // remove ephemeral once patched
+    return { components: [container], flags: Djs.MessageFlags.IsComponentsV2 };
 }
 
 function buildDeployableAuthorField(deploy: T.Deployable): Djs.EmbedAuthorOptions {
