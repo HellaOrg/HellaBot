@@ -86,6 +86,10 @@ type ObjectMap = {
     'sandbox/stage/0': T.SandboxStage;
     'sandbox/item/0': T.SandboxItem;
     'sandbox/weather/0': T.SandboxWeather;
+    'sandboxv3': T.SandboxV3Act;
+    'sandboxv3/stage/0': T.SandboxV3Stage;
+    'sandboxv3/item/0': T.SandboxV3Item;
+    'sandboxv3/weather/0': T.SandboxV3Weather;
     'skill': T.Skill;
     'skin': T.Skin;
     'stage': T.Stage[];

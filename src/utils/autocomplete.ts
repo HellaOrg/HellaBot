@@ -134,6 +134,30 @@ export async function autocompleteSandboxWeather(act: sandTheme, { query, includ
         .slice(0, limit)
         .map(weather => ({ name: weather.name, value: weather.weatherId }));
 }
+export async function autocompleteSandboxV3Item(act: sandTheme, { query, include = [] }: AutocompleteParams, callback: (e: T.SandboxV3Item) => boolean = () => true) {
+    const requiredInclude = ['data.itemId', 'data.itemName'];
+
+    return (await api.match(`sandboxv3/item/${act}`, { query, include: requiredInclude.concat(include) }))
+        .filter(callback)
+        .slice(0, limit)
+        .map(item => ({ name: item.data.itemName, value: item.data.itemId }));
+}
+export async function autocompleteSandboxV3Stage(act: sandTheme, { query, include = [] }: AutocompleteParams, callback: (e: T.SandboxV3Stage) => boolean = () => true) {
+    const requiredInclude = ['excel.stageId', 'excel.name', 'excel.code'];
+
+    return (await api.match(`sandboxv3/stage/${act}`, { query, include: requiredInclude.concat(include) }))
+        .filter(callback)
+        .slice(0, limit)
+        .map(stage => ({ name: `${stage.excel.code} - ${stage.excel.name}`, value: stage.excel.stageId }));
+}
+export async function autocompleteSandboxV3Weather(act: sandTheme, { query, include = [] }: AutocompleteParams, callback: (e: T.SandboxV3Weather) => boolean = () => true) {
+    const requiredInclude = ['weatherId', 'name'];
+
+    return (await api.match(`sandboxv3/weather/${act}`, { query, include: requiredInclude.concat(include) }))
+        .filter(callback)
+        .slice(0, limit)
+        .map(weather => ({ name: weather.name, value: weather.weatherId }));
+}
 export async function autocompleteItem({ query, include = [] }: AutocompleteParams, callback: (e: T.Item) => boolean = () => true) {
     const requiredInclude = ['data.itemId', 'data.name'];
 

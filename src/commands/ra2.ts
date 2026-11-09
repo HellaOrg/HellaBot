@@ -108,7 +108,7 @@ export default class RA2Command implements Command {
 
                 await interaction.deferReply();
 
-                const weatherEmbed = await buildSandboxWeatherMessage(innerIndex, weather);
+                const weatherEmbed = await buildSandboxWeatherMessage(weather);
                 return await interaction.editReply(weatherEmbed);
             }
         }

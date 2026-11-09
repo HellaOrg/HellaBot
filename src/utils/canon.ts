@@ -218,6 +218,24 @@ export class SandboxWeather {
     }
 }
 
+export class SandboxV3Item {
+    static isValid(item: T.SandboxV3Item): boolean {
+        return !!item;
+    }
+}
+
+export class SandboxV3Stage {
+    static isValid(stage: T.SandboxV3Stage): boolean {
+        return !!stage && !!stage.excel && !!stage.substages;
+    }
+}
+
+export class SandboxV3Weather {
+    static isValid(weather: T.SandboxV3Weather): boolean {
+        return !!weather;
+    }
+}
+
 export class Skill {
     static isValid(skill: T.Skill): boolean {
         return !!skill && !!skill.excel;

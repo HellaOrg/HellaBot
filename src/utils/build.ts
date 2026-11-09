@@ -1707,13 +1707,97 @@ export async function buildSandboxStageMessage(theme: number, stage: T.SandboxSt
         return { content: '', embeds: [embed], components: [buttonRow] };
     }
 }
-export async function buildSandboxWeatherMessage(theme: number, weather: T.SandboxWeather): Promise<Djs.InteractionEditReplyOptions> {
+export async function buildSandboxWeatherMessage(weather: T.SandboxWeather): Promise<Djs.InteractionEditReplyOptions> {
     const embed = new Djs.EmbedBuilder()
         .setColor(embedColour)
         .setTitle(weather.name)
         .setDescription(`${weather.functionDesc}\n\n${weather.description}`);
 
-    const imagePath = paths.myAssetUrl + `/sandbox/weather/${weather.weatherIconId}.png`;
+    const imagePath = paths.myAssetUrl + `/sandbox/v2/weather/${weather.weatherIconId}.png`;
+    if (await urlExists(imagePath))
+        embed.setThumbnail(imagePath);
+
+    return { embeds: [embed] };
+}
+export async function buildSandboxV3ItemMessage(theme: number, item: T.SandboxV3Item): Promise<Djs.InteractionEditReplyOptions> {
+    const items = (await api.single('sandboxv3', { query: theme.toString(), include: ['itemDict'] })).itemDict;
+
+    const embed = new Djs.EmbedBuilder()
+        .setColor(embedColour)
+        .setTitle(item.data.itemName)
+        .setDescription(`${item.data.itemUsage}\n\n${item.data.itemDesc}`);
+
+    if (item.cook) {
+    }
+    if (item.spice) {
+    }
+    if (item.process) {
+    }
+    if (item.build) {
+    }
+
+    const imagePath = paths.myAssetUrl + `/sandbox/items/${item.data.itemId}.png`;
+    if (await urlExists(imagePath))
+        embed.setThumbnail(imagePath);
+
+    return { embeds: [embed] };
+}
+export async function buildSandboxV3StageMessage(theme: number, stage: T.SandboxV3Stage, page: number): Promise<Djs.InteractionEditReplyOptions> {
+    const container = new Djs.ContainerBuilder();
+
+    const grid: string[] = Array(9).fill('⬛');
+
+    let acc = 0;
+    for (let i = 0; i < stage.story.subStageIdList.length; i++) {
+        if (stage.story.subStageIdList[i] === '')
+            continue;
+
+        const emojis = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣'];
+        grid[i] = emojis[acc];
+        acc++;
+    }
+
+    const titleText = new Djs.TextDisplayBuilder()
+        .setContent([
+            `### ${stage.excel.code} - ${stage.excel.name}`,
+            removeStyleTags(stage.excel.description),
+            '',
+            '**Map Grid**',
+            grid.slice(0, 3).join(''),
+            grid.slice(3, 6).join(''),
+            grid.slice(6, 9).join('')
+        ].join('\n'));
+    container.addTextDisplayComponents(titleText);
+
+    let substageIndex = 1;
+    for (const substage of stage.substages) {
+        container.addSeparatorComponents(new Djs.SeparatorBuilder().setSpacing(Djs.SeparatorSpacingSize.Large));
+
+        const substageTitleSection = new Djs.SectionBuilder();
+        container.addSectionComponents(substageTitleSection);
+
+        const substageTitle = new Djs.TextDisplayBuilder()
+            .setContent(`### Section ${substageIndex++}`);
+        substageTitleSection.addTextDisplayComponents(substageTitle);
+
+        const enemyComponents = await buildStageEnemyComponents(substage.levels);
+        substageTitleSection.addTextDisplayComponents(enemyComponents);
+
+        const imagePath = paths.myAssetUrl + `/sandbox/stages/${substage.excel.mapPreviewId}.png`;
+        substageTitleSection.setThumbnailAccessory(
+            new Djs.ThumbnailBuilder().setURL(imagePath)
+        );
+    }
+
+    return { components: [container], flags: Djs.MessageFlags.IsComponentsV2 };
+}
+export async function buildSandboxV3WeatherMessage(theme: number, weather: T.SandboxV3Weather): Promise<Djs.InteractionEditReplyOptions> {
+    const embed = new Djs.EmbedBuilder()
+        .setColor(embedColour)
+        .setTitle(weather.name)
+        .setDescription(`${weather.funcDesc}\n\n${weather.desc}`);
+
+    const imagePath = paths.myAssetUrl + `/sandbox/v3/weather/${weather.weatherId}.png`;
     if (await urlExists(imagePath))
         embed.setThumbnail(imagePath);
 
@@ -1923,7 +2007,7 @@ function buildBannerField(opNames: T.Operator[], banner: T.GachaPool): Djs.Embed
                 bannerDesc = `Select and lock-in three 6★ and three 5★ operators from a pool.\n6★ ${ops6.join(', ')}`;
                 break;
             }
-            case 11: {
+            case 'BACKFLOW': {
                 const ops6 = [];
                 for (const charList of banner.details.detailInfo.availCharInfo.perAvailList) {
                     for (const charId of charList.charIdList) {
