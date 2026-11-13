@@ -289,7 +289,7 @@ export async function buildCurrentMessage(): Promise<Djs.InteractionEditReplyOpt
             'client.openTime': { '<=': currTime },
             'client.endTime': { '>=': currTime }
         },
-        sort: { 'client.endTime': 'desc' },
+        sort: { 'client.endTime': 'asc' },
         limit: 6
     }));
     const currEvents = (await api.searchV2('event', {
@@ -297,7 +297,7 @@ export async function buildCurrentMessage(): Promise<Djs.InteractionEditReplyOpt
             'startTime': { '<=': currTime },
             'endTime': { '>=': currTime }
         },
-        sort: { 'endTime': 'desc' },
+        sort: { 'endTime': 'asc' },
         limit: 6
     }));
     const opNames = await api.all('operator', { include: ['id', 'data.name'] });
