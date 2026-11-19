@@ -1,25 +1,25 @@
 {
     "name": "hellabot",
-    "version": "1.0.0",
-    "description": "",
+    "version": "0.0.0",
+    "private": true,
     "scripts": {
-        "start": "ts-node src/index.ts",
-        "update-types": "npm install hella-types@latest",
-        "canon-test": "ts-node src/utils/canon.test.ts"
+        "start": "tsx src/index.ts",
+        "typecheck": "tsc --noEmit",
+        "canon-test": "tsx src/utils/canon.test.ts"
     },
-    "author": "",
     "dependencies": {
-        "discord.js": "^14.27.0",
-        "hella-types": "^0.4.0",
-        "puppeteer": "^25.12.0",
-        "ts-node": "^10.9.2",
-        "typescript": "^6.0.3",
+        "discord.js": "^14.28.1",
+        "puppeteer": "^25.18.1",
+        "tsx": "^4.23.15",
         "w3c-xmlhttprequest": "^3.0.4"
     },
     "allowScripts": {
-        "puppeteer@25.12.0": true
+        "puppeteer@25.18.1": true
     },
     "devDependencies": {
-        "diff": "^9.0.0"
+        "@types/node": "^24.19.2",
+        "diff": "^9.0.0",
+        "hella-types": "^0.5.0",
+        "typescript": "^7.0.2"
     }
 }
